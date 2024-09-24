@@ -1,0 +1,26 @@
+# Vivado & Vitis git ignore
+
+#Vivado folder
+*.cache/
+*.hw/
+*.runs/
+*.sim/
+
+#Vivado extensions
+*.jou
+*.prj
+*.wdb
+*.bat
+*.obj
+*.info
+*.tcl
+*.mem
+*.dbg
+*.rlx
+*.rtti
+*.type
+*.xdbg
+*.log
+*.sdb
+*.pb
+*.ini
