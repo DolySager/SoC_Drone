@@ -48,9 +48,125 @@
 #include <stdio.h>
 #include "platform.h"
 #include "xil_printf.h"
+#include "xparameters.h"
+#include "xiic.h"
+#include "math.h"
+
+
+#define BLDC_MOTOR_BASEADDR 	XPAR_MYIP_DRONE_BLDC_MOTO_0_S00_AXI_BASEADDR
+
+#define IIC_ID 					XPAR_IIC_0_DEVICE_ID
+#define IIC_BASEADDR			XPAR_IIC_0_BASEADDR
+
+////////////////////////////////////////////////////////////////////
+
+#define RAD_TO_DEG 57.295779513082320876798154814105
+
+#define WHO_AM_I_REG 0x75
+#define PWR_MGMT_1_REG 0x6B
+#define SMPLRT_DIV_REG 0x19
+#define ACCEL_CONFIG_REG 0x1C
+#define ACCEL_XOUT_H_REG 0x3B
+#define TEMP_OUT_H_REG 0x41
+#define GYRO_CONFIG_REG 0x1B
+#define GYRO_XOUT_H_REG 0x43
 
 
 
+// Setup MPU6050
+#define MPU6050_ADDR 0x68
+const u16 i2c_timeout = 100;
+const double Accel_Z_corrector = 14418.0;
+
+u32 timer;
+
+
+
+
+typedef struct
+{
+
+    int16_t Accel_X_RAW;
+    int16_t Accel_Y_RAW;
+    int16_t Accel_Z_RAW;
+    double Ax;
+    double Ay;
+    double Az;
+
+    int16_t Gyro_X_RAW;
+    int16_t Gyro_Y_RAW;
+    int16_t Gyro_Z_RAW;
+    double Gx;
+    double Gy;
+    double Gz;
+
+    float Temperature;
+
+    double KalmanAngleX;
+    double KalmanAngleY;
+} MPU6050_t;
+
+
+MPU6050_t MPU6050;
+
+
+typedef struct
+{
+    double Q_angle;
+    double Q_bias;
+    double R_measure;
+    double angle;
+    double bias;
+    double P[2][2];
+} Kalman_t;
+
+
+Kalman_t KalmanX = { .Q_angle = 0.001f, .Q_bias = 0.003f, .R_measure = 0.03f };
+Kalman_t KalmanY = { .Q_angle = 0.001f, .Q_bias = 0.003f, .R_measure = 0.03f };
+
+
+////////////////////////////////////////////////////////////////////////////////////
+
+#define LCD_RS			0
+#define LCD_RW			1
+#define LCD_E			2
+#define LCD_BACKLIGHT	3
+
+#define LCD_DEV_ADDR	(0x27<<1)	// address 0x27 beginning from bit 1, bit 0 is R/W_bar
+
+#define COMMAND_DISPLAY_CLEAR	0x01
+#define COMMAND_DISPLAY_ON		0x0C
+#define COMMAND_DISPLAY_OFF		0x08
+#define COMMAND_ENTRY_MODE		0x06
+#define COMMAND_4BIT_MODE		0x28
+
+////////////////////////////////////////////////////////////////////
+
+XIic iic_instance;
+
+static u8 I2C_LCD_Data;
+
+void LCD_Data_4bit (u8 data);
+void LCD_EnablePin();
+void LCD_WriteCommand(uint8_t commandData);
+void LCD_WriteData(uint8_t charData);
+void LCD_Init();
+void LCD_BackLightOn();
+void LCD_GotoXY(uint8_t row, uint8_t col);
+void LCD_WriteString(char *string);
+
+////////////////////////////////////////////////////////////////////
+
+void MPU6050_Init(void);
+void MPU6050_Read(u8 reg, u8 *buffer, u16 len);
+void MPU6050_Write(u8 reg, u8 data);
+
+void MPU6050_Read_Accel();
+void MPU6050_Read_Gyro();
+void MPU6050_Read_Temp();
+void MPU6050_Read_All();
+
+double Kalman_getAngle(Kalman_t *Kalman, double newAngle, double newRate, double dt);
 
 
 int main() {
@@ -58,7 +174,7 @@ int main() {
 
     print("Start!\n\r");
 
-    XIic_Initialize(&iic_instance.BaseAddress, IIC_ID);
+    XIic_Initialize(&iic_instance, IIC_ID);
 
     MPU6050_Init();
 
@@ -71,8 +187,7 @@ int main() {
     volatile unsigned int* motor_power = (volatile unsigned int*) BLDC_MOTOR_BASEADDR;
 
 
-    Kalman_t KalmanX = { .Q_angle = 0.001f, .Q_bias = 0.003f, .R_measure = 0.03f };
-    Kalman_t KalmanY = { .Q_angle = 0.001f, .Q_bias = 0.003f, .R_measure = 0.03f };
+
 
     while(1) {
 
@@ -82,7 +197,7 @@ int main() {
     		usleep(10);
     	}
 
-    	print(" data : %d \n\r" ,MPU6050);
+    	printf(" data : %d \n\r" ,MPU6050);
 
     	MPU6050_Read_All();
 
@@ -111,7 +226,8 @@ void MPU6050_Read(u8 reg, u8 *buffer, u16 len) {
 }
 
 
-void MPU6050_Init(void) {
+void MPU6050_Init(void)
+{
     // 전원 관리 레지스터 설정 (디바이스 깨우기)
     MPU6050_Write(0x6B, 0x00);
 }
@@ -168,7 +284,7 @@ void MPU6050_Read_Temp()
     // 16비트 온도 데이터 결합
     temp = (int16_t)(Rec_Data[0] << 8 | Rec_Data[1]);
 
-    // 온도를 계산하고 DataStruct에 저장 (화씨 변환 없이 섭씨로 계산)
+    // 온도를 계산하고 MPU6050에 저장 (화씨 변환 없이 섭씨로 계산)
     MPU6050.Temperature = (float)((int16_t)temp / 340.0 + 36.53);
 }
 
@@ -204,7 +320,38 @@ void MPU6050_Read_All()
     XTime_GetTime(&current_time);
     double dt = (double)(current_time - timer) / (COUNTS_PER_SECOND);  // dt 계산
     timer = current_time;*/
-}
+    // Kalman angle solve
+
+        double dt = (double)(HAL_GetTick() - timer) / 1000;
+        timer = HAL_GetTick();
+
+
+
+        double roll;
+        double roll_sqrt = sqrt(MPU6050.Accel_X_RAW * MPU6050.Accel_X_RAW + MPU6050.Accel_Z_RAW * MPU6050.Accel_Z_RAW);
+        if (roll_sqrt != 0.0)
+        {
+            roll = atan(MPU6050.Accel_Y_RAW / roll_sqrt) * RAD_TO_DEG;
+        }
+        else
+        {
+            roll = 0.0;
+        }
+        double pitch = atan2(-MPU6050.Accel_X_RAW, MPU6050.Accel_Z_RAW) * RAD_TO_DEG;
+        if ((pitch < -90 && MPU6050.KalmanAngleY > 90) || (pitch > 90 && MPU6050.KalmanAngleY < -90))
+        {
+            KalmanY.angle = pitch;
+            MPU6050.KalmanAngleY = pitch;
+        }
+        else
+        {
+        	MPU6050.KalmanAngleY = Kalman_getAngle(&KalmanY, pitch, MPU6050.Gy, dt);
+        }
+        if (fabs(MPU6050.KalmanAngleY) > 90)
+        	MPU6050.Gx = -MPU6050.Gx;
+        MPU6050.KalmanAngleX = Kalman_getAngle(&KalmanX, roll, MPU6050.Gx, dt);
+    }
+
 
 
 
@@ -237,3 +384,81 @@ double Kalman_getAngle(Kalman_t *Kalman, double newAngle, double newRate, double
 
     return Kalman->angle;
 };
+
+
+///////////////////////////////////////////////
+
+
+void LCD_Data_4bit (u8 data)
+{
+	I2C_LCD_Data = (I2C_LCD_Data & 0x0f) | (data & 0xf0);		// put upper four bits
+	LCD_EnablePin();
+	I2C_LCD_Data = (I2C_LCD_Data & 0x0f) | ((data & 0x0f)<<4);	// put lower four bits
+	LCD_EnablePin();
+
+}
+
+void LCD_EnablePin()
+{
+	I2C_LCD_Data &= ~(1<<LCD_E);
+	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
+	I2C_LCD_Data |= (1<<LCD_E);
+	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
+	I2C_LCD_Data &= ~(1<<LCD_E);
+	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
+	MB_Sleep(2);
+}
+
+void LCD_WriteCommand(uint8_t commandData)
+{
+	I2C_LCD_Data &= ~(1<<LCD_RS);					// enter instruction code mode
+	I2C_LCD_Data &= ~(1<<LCD_RW);					// enter write mode
+	LCD_Data_4bit(commandData);						// output data
+}
+void LCD_WriteData(uint8_t charData)
+{
+	I2C_LCD_Data |= (1<<LCD_RS);						// enter data mode
+	I2C_LCD_Data &= ~(1<<LCD_RW);						// enter write mode
+	LCD_Data_4bit(charData);						// output data
+}
+void LCD_Init()
+{
+	// see HD44780 datasheet page 45 for following init commands
+	MB_Sleep(20);
+	LCD_WriteCommand(0x03);
+	MB_Sleep(5);
+	LCD_WriteCommand(0x03);
+	MB_Sleep(1);
+	LCD_WriteCommand(0x03);
+
+	LCD_WriteCommand(0x02);
+	LCD_WriteCommand(COMMAND_4BIT_MODE);
+	LCD_WriteCommand(COMMAND_DISPLAY_OFF);
+	LCD_WriteCommand(COMMAND_DISPLAY_CLEAR);
+	LCD_WriteCommand(COMMAND_ENTRY_MODE);
+	LCD_WriteCommand(COMMAND_DISPLAY_ON);
+	LCD_BackLightOn();
+}
+void LCD_BackLightOn()
+{
+	I2C_LCD_Data |= (1<<LCD_BACKLIGHT);
+
+}
+
+void LCD_GotoXY(uint8_t row, uint8_t col)
+{
+	col %= 16;										// column width is within 16
+	row %= 2;										// row length is within 2
+	uint8_t address = (0x40 * row) + col;			// see HD44780 datasheet page 12
+	uint8_t command = 0x80 + address;
+	LCD_WriteCommand(command);
+}
+
+void LCD_WriteString(char *string)
+{
+	for (uint8_t i = 0; string[i]; i++)
+	{
+		LCD_WriteData(string[i]);
+	}
+}
+
