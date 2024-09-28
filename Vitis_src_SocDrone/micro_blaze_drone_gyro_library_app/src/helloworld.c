@@ -45,6 +45,9 @@
  *   ps7_uart    115200 (configured by bootrom/bsp)
  */
 
+
+
+
 #include <stdio.h>
 #include "platform.h"
 #include "xil_printf.h"
@@ -212,14 +215,14 @@ int main() {
 }
 
 
-// MPU-6050 ·¹Áö½ºÅÍ ¾²±â
+// MPU-6050 ë ˆì§€ìŠ¤í„° ì“°ê¸°
 void MPU6050_Write(u8 reg, u8 data) {
     u8 buffer[2] = {reg, data};
     XIic_Send(iic_instance.BaseAddress, MPU6050_ADDR, buffer, 2, XIIC_STOP);
 }
 
 
-// MPU-6050 ·¹Áö½ºÅÍ ÀĞ±â
+// MPU-6050 ë ˆì§€ìŠ¤í„° ì½ê¸°
 void MPU6050_Read(u8 reg, u8 *buffer, u16 len) {
 	XIic_Send(iic_instance.BaseAddress, MPU6050_ADDR, &reg, 1, XIIC_STOP);
     XIic_Recv(iic_instance.BaseAddress, MPU6050_ADDR, buffer, 14, XIIC_STOP);
@@ -228,7 +231,7 @@ void MPU6050_Read(u8 reg, u8 *buffer, u16 len) {
 
 void MPU6050_Init(void)
 {
-    // Àü¿ø °ü¸® ·¹Áö½ºÅÍ ¼³Á¤ (µğ¹ÙÀÌ½º ±ú¿ì±â)
+    // ì „ì› ê´€ë¦¬ ë ˆì§€ìŠ¤í„° ì„¤ì • (ë””ë°”ì´ìŠ¤ ê¹¨ìš°ê¸°)
     MPU6050_Write(0x6B, 0x00);
 }
 
@@ -239,7 +242,7 @@ void MPU6050_Read_Accel()
 {
     u8 Rec_Data[6];
 
-    // ACCEL_XOUT_H ·¹Áö½ºÅÍºÎÅÍ 6¹ÙÀÌÆ® ÀĞ±â
+    // ACCEL_XOUT_H ë ˆì§€ìŠ¤í„°ë¶€í„° 6ë°”ì´íŠ¸ ì½ê¸°
     MPU6050_Read(0x3B, Rec_Data, 6);
 
  // I2C_ReadRegister(&iic_instance.BaseAddress, MPU6050_ADDR, ACCEL_XOUT_H_REG, Rec_Data, 6);
@@ -258,7 +261,7 @@ void MPU6050_Read_Gyro()
     u8 Rec_Data[6];
 
     MPU6050_Read(0x43, Rec_Data, 6);
-    // GYRO_XOUT_H ·¹Áö½ºÅÍºÎÅÍ 6¹ÙÀÌÆ® ÀĞ±â
+    // GYRO_XOUT_H ë ˆì§€ìŠ¤í„°ë¶€í„° 6ë°”ì´íŠ¸ ì½ê¸°
     //I2C_ReadRegister(&iic_instance.BaseAddress, MPU6050_ADDR, GYRO_XOUT_H_REG, Rec_Data, 6);
 
     MPU6050.Gyro_X_RAW = (int16_t)(Rec_Data[0] << 8 | Rec_Data[1]);
@@ -278,13 +281,13 @@ void MPU6050_Read_Temp()
     int16_t temp;
 
     MPU6050_Read(0x41, Rec_Data, 2);
-    // TEMP_OUT_H_REG ·¹Áö½ºÅÍºÎÅÍ 2¹ÙÀÌÆ® ÀĞ±â
+    // TEMP_OUT_H_REG ë ˆì§€ìŠ¤í„°ë¶€í„° 2ë°”ì´íŠ¸ ì½ê¸°
     //I2C_ReadRegister(&iic_instance.BaseAddress, MPU6050_ADDR, TEMP_OUT_H_REG, Rec_Data, 2);
 
-    // 16ºñÆ® ¿Âµµ µ¥ÀÌÅÍ °áÇÕ
+    // 16ë¹„íŠ¸ ì˜¨ë„ ë°ì´í„° ê²°í•©
     temp = (int16_t)(Rec_Data[0] << 8 | Rec_Data[1]);
 
-    // ¿Âµµ¸¦ °è»êÇÏ°í MPU6050¿¡ ÀúÀå (È­¾¾ º¯È¯ ¾øÀÌ ¼·¾¾·Î °è»ê)
+    // ì˜¨ë„ë¥¼ ê³„ì‚°í•˜ê³  MPU6050ì— ì €ì¥ (í™”ì”¨ ë³€í™˜ ì—†ì´ ì„­ì”¨ë¡œ ê³„ì‚°)
     MPU6050.Temperature = (float)((int16_t)temp / 340.0 + 36.53);
 }
 
@@ -296,7 +299,7 @@ void MPU6050_Read_All()
     int16_t temp;
 
     MPU6050_Read(0x3B, Rec_Data, 14);
-    // ACCEL_XOUT_H ·¹Áö½ºÅÍºÎÅÍ 14¹ÙÀÌÆ® ÀĞ±â
+    // ACCEL_XOUT_H ë ˆì§€ìŠ¤í„°ë¶€í„° 14ë°”ì´íŠ¸ ì½ê¸°
     //I2C_ReadRegister(&iic_instance.BaseAddress, MPU6050_ADDR, ACCEL_XOUT_H_REG, Rec_Data, 14);
 
     MPU6050.Accel_X_RAW = (int16_t)(Rec_Data[0] << 8 | Rec_Data[1]);
@@ -315,10 +318,10 @@ void MPU6050_Read_All()
     MPU6050.Gy = MPU6050.Gyro_Y_RAW / 131.0;
     MPU6050.Gz = MPU6050.Gyro_Z_RAW / 131.0;
 
-/*    // Å¸ÀÌ¸Ó °ü·Ã ¼öÁ¤ (XTime »ç¿ë)
+/*    // íƒ€ì´ë¨¸ ê´€ë ¨ ìˆ˜ì • (XTime ì‚¬ìš©)
     XTime current_time;
     XTime_GetTime(&current_time);
-    double dt = (double)(current_time - timer) / (COUNTS_PER_SECOND);  // dt °è»ê
+    double dt = (double)(current_time - timer) / (COUNTS_PER_SECOND);  // dt ê³„ì‚°
     timer = current_time;*/
     // Kalman angle solve
 
@@ -461,4 +464,5 @@ void LCD_WriteString(char *string)
 		LCD_WriteData(string[i]);
 	}
 }
+
 
