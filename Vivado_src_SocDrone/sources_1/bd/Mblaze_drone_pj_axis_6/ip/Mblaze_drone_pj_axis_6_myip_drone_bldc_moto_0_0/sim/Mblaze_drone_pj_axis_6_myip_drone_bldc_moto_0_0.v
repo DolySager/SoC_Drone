@@ -48,7 +48,7 @@
 
 
 // IP VLNV: xilinx.com:user:myip_drone_bldc_motor_ctrl:1.0
-// IP Revision: 3
+// IP Revision: 4
 
 `timescale 1ns/1ps
 

@@ -448,7 +448,7 @@
     (
             .clk(S_AXI_ACLK),           
             .reset_p(~S_AXI_ARESETN),
-            .motor_ouput(slv_reg0[15:0]),
+            .motor_output(slv_reg0[15:0]),
             .pwm(pwm[0])
     );
     
@@ -456,7 +456,7 @@
     (
             .clk(S_AXI_ACLK),           
             .reset_p(~S_AXI_ARESETN),
-            .motor_ouput(slv_reg1[15:0]),
+            .motor_output(slv_reg1[15:0]),
             .pwm(pwm[1])
     );
     
@@ -464,7 +464,7 @@
     (
             .clk(S_AXI_ACLK),           
             .reset_p(~S_AXI_ARESETN),
-            .motor_ouput(slv_reg2[15:0]),
+            .motor_output(slv_reg2[15:0]),
             .pwm(pwm[2])
     );
     
@@ -472,7 +472,7 @@
     (
             .clk(S_AXI_ACLK),           
             .reset_p(~S_AXI_ARESETN),
-            .motor_ouput(slv_reg3[15:0]),
+            .motor_output(slv_reg3[15:0]),
             .pwm(pwm[3])
     );
 

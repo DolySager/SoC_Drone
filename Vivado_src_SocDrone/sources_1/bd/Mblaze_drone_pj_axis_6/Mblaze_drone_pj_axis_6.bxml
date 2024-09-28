@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Root MajorVersion="0" MinorVersion="39">
-  <CompositeFile CompositeFileTopName="Mblaze_drone_pj_axis_6" CanBeSetAsTop="false" CanDisplayChildGraph="true">
+  <CompositeFile CompositeFileTopName="Mblaze_drone_pj_axis_6" CanBeSetAsTop="true" CanDisplayChildGraph="true">
     <Description>Composite Fileset</Description>
-    <Generation Name="SYNTHESIS" State="GENERATED" Timestamp="1727398383"/>
-    <Generation Name="IMPLEMENTATION" State="GENERATED" Timestamp="1727398383"/>
-    <Generation Name="SIMULATION" State="GENERATED" Timestamp="1727398383"/>
-    <Generation Name="HW_HANDOFF" State="GENERATED" Timestamp="1727398383"/>
+    <Generation Name="SYNTHESIS" State="GENERATED" Timestamp="1727502628"/>
+    <Generation Name="IMPLEMENTATION" State="GENERATED" Timestamp="1727502628"/>
+    <Generation Name="SIMULATION" State="GENERATED" Timestamp="1727502628"/>
+    <Generation Name="HW_HANDOFF" State="GENERATED" Timestamp="1727502628"/>
     <FileCollection Name="SOURCES" Type="SOURCES">
       <File Name="ip\Mblaze_drone_pj_axis_6_clk_wiz_0_0\Mblaze_drone_pj_axis_6_clk_wiz_0_0.xci" Type="IP">
         <Instance HierarchyPath="clk_wiz_0"/>

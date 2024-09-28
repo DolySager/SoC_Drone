@@ -9,7 +9,6 @@
       "validated": "true"
     },
     "design_tree": {
-      "clk_wiz_0": "",
       "microblaze_0": "",
       "microblaze_0_local_memory": {
         "dlmb_v10": "",
@@ -29,10 +28,11 @@
       "microblaze_0_axi_intc": "",
       "microblaze_0_xlconcat": "",
       "mdm_1": "",
-      "rst_clk_wiz_0_100M": "",
-      "axi_uartlite_0": "",
       "axi_iic_0": "",
-      "myip_drone_bldc_moto_0": ""
+      "axi_uartlite_0": "",
+      "clk_wiz_0": "",
+      "myip_drone_bldc_moto_0": "",
+      "rst_clk_wiz_0_100M": ""
     },
     "interface_ports": {
       "usb_uart": {
@@ -85,21 +85,6 @@
       }
     },
     "components": {
-      "clk_wiz_0": {
-        "vlnv": "xilinx.com:ip:clk_wiz:6.0",
-        "xci_name": "Mblaze_drone_pj_axis_6_clk_wiz_0_0",
-        "parameters": {
-          "CLK_IN1_BOARD_INTERFACE": {
-            "value": "sys_clock"
-          },
-          "RESET_BOARD_INTERFACE": {
-            "value": "reset"
-          },
-          "USE_BOARD_FLOW": {
-            "value": "true"
-          }
-        }
-      },
       "microblaze_0": {
         "vlnv": "xilinx.com:ip:microblaze:11.0",
         "xci_name": "Mblaze_drone_pj_axis_6_microblaze_0_0",
@@ -227,6 +212,24 @@
           }
         },
         "interface_nets": {
+          "microblaze_0_dlmb_cntlr": {
+            "interface_ports": [
+              "dlmb_bram_if_cntlr/BRAM_PORT",
+              "lmb_bram/BRAM_PORTA"
+            ]
+          },
+          "microblaze_0_dlmb_bus": {
+            "interface_ports": [
+              "dlmb_v10/LMB_Sl_0",
+              "dlmb_bram_if_cntlr/SLMB"
+            ]
+          },
+          "microblaze_0_dlmb": {
+            "interface_ports": [
+              "DLMB",
+              "dlmb_v10/LMB_M"
+            ]
+          },
           "microblaze_0_ilmb": {
             "interface_ports": [
               "ILMB",
@@ -239,28 +242,10 @@
               "ilmb_bram_if_cntlr/SLMB"
             ]
           },
-          "microblaze_0_dlmb_cntlr": {
-            "interface_ports": [
-              "dlmb_bram_if_cntlr/BRAM_PORT",
-              "lmb_bram/BRAM_PORTA"
-            ]
-          },
           "microblaze_0_ilmb_cntlr": {
             "interface_ports": [
               "ilmb_bram_if_cntlr/BRAM_PORT",
               "lmb_bram/BRAM_PORTB"
-            ]
-          },
-          "microblaze_0_dlmb": {
-            "interface_ports": [
-              "DLMB",
-              "dlmb_v10/LMB_M"
-            ]
-          },
-          "microblaze_0_dlmb_bus": {
-            "interface_ports": [
-              "dlmb_v10/LMB_Sl_0",
-              "dlmb_bram_if_cntlr/SLMB"
             ]
           }
         },
@@ -698,24 +683,6 @@
           }
         },
         "interface_nets": {
-          "microblaze_0_axi_periph_to_s00_couplers": {
-            "interface_ports": [
-              "S00_AXI",
-              "s00_couplers/S_AXI"
-            ]
-          },
-          "s00_couplers_to_xbar": {
-            "interface_ports": [
-              "s00_couplers/M_AXI",
-              "xbar/S00_AXI"
-            ]
-          },
-          "m00_couplers_to_microblaze_0_axi_periph": {
-            "interface_ports": [
-              "M00_AXI",
-              "m00_couplers/M_AXI"
-            ]
-          },
           "xbar_to_m00_couplers": {
             "interface_ports": [
               "xbar/M00_AXI",
@@ -728,10 +695,22 @@
               "m01_couplers/M_AXI"
             ]
           },
-          "xbar_to_m01_couplers": {
+          "microblaze_0_axi_periph_to_s00_couplers": {
             "interface_ports": [
-              "xbar/M01_AXI",
-              "m01_couplers/S_AXI"
+              "S00_AXI",
+              "s00_couplers/S_AXI"
+            ]
+          },
+          "m00_couplers_to_microblaze_0_axi_periph": {
+            "interface_ports": [
+              "M00_AXI",
+              "m00_couplers/M_AXI"
+            ]
+          },
+          "s00_couplers_to_xbar": {
+            "interface_ports": [
+              "s00_couplers/M_AXI",
+              "xbar/S00_AXI"
             ]
           },
           "m02_couplers_to_microblaze_0_axi_periph": {
@@ -740,16 +719,22 @@
               "m02_couplers/M_AXI"
             ]
           },
-          "m03_couplers_to_microblaze_0_axi_periph": {
+          "xbar_to_m01_couplers": {
             "interface_ports": [
-              "M03_AXI",
-              "m03_couplers/M_AXI"
+              "xbar/M01_AXI",
+              "m01_couplers/S_AXI"
             ]
           },
           "xbar_to_m02_couplers": {
             "interface_ports": [
               "xbar/M02_AXI",
               "m02_couplers/S_AXI"
+            ]
+          },
+          "m03_couplers_to_microblaze_0_axi_periph": {
+            "interface_ports": [
+              "M03_AXI",
+              "m03_couplers/M_AXI"
             ]
           },
           "xbar_to_m03_couplers": {
@@ -816,9 +801,9 @@
         "vlnv": "xilinx.com:ip:mdm:3.2",
         "xci_name": "Mblaze_drone_pj_axis_6_mdm_1_0"
       },
-      "rst_clk_wiz_0_100M": {
-        "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
-        "xci_name": "Mblaze_drone_pj_axis_6_rst_clk_wiz_0_100M_0"
+      "axi_iic_0": {
+        "vlnv": "xilinx.com:ip:axi_iic:2.0",
+        "xci_name": "Mblaze_drone_pj_axis_6_axi_iic_0_0"
       },
       "axi_uartlite_0": {
         "vlnv": "xilinx.com:ip:axi_uartlite:2.0",
@@ -835,16 +820,49 @@
           }
         }
       },
-      "axi_iic_0": {
-        "vlnv": "xilinx.com:ip:axi_iic:2.0",
-        "xci_name": "Mblaze_drone_pj_axis_6_axi_iic_0_0"
+      "clk_wiz_0": {
+        "vlnv": "xilinx.com:ip:clk_wiz:6.0",
+        "xci_name": "Mblaze_drone_pj_axis_6_clk_wiz_0_0",
+        "parameters": {
+          "CLK_IN1_BOARD_INTERFACE": {
+            "value": "sys_clock"
+          },
+          "RESET_BOARD_INTERFACE": {
+            "value": "reset"
+          },
+          "USE_BOARD_FLOW": {
+            "value": "true"
+          }
+        }
       },
       "myip_drone_bldc_moto_0": {
         "vlnv": "xilinx.com:user:myip_drone_bldc_motor_ctrl:1.0",
         "xci_name": "Mblaze_drone_pj_axis_6_myip_drone_bldc_moto_0_0"
+      },
+      "rst_clk_wiz_0_100M": {
+        "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
+        "xci_name": "Mblaze_drone_pj_axis_6_rst_clk_wiz_0_100M_0"
       }
     },
     "interface_nets": {
+      "microblaze_0_axi_periph_M01_AXI": {
+        "interface_ports": [
+          "microblaze_0_axi_periph/M01_AXI",
+          "axi_uartlite_0/S_AXI"
+        ]
+      },
+      "microblaze_0_debug": {
+        "interface_ports": [
+          "mdm_1/MBDEBUG_0",
+          "microblaze_0/DEBUG"
+        ]
+      },
+      "axi_iic_0_IIC": {
+        "interface_ports": [
+          "iic_rtl",
+          "axi_iic_0/IIC"
+        ]
+      },
       "axi_uartlite_0_UART": {
         "interface_ports": [
           "usb_uart",
@@ -857,40 +875,10 @@
           "microblaze_0_axi_intc/s_axi"
         ]
       },
-      "axi_iic_0_IIC": {
-        "interface_ports": [
-          "iic_rtl",
-          "axi_iic_0/IIC"
-        ]
-      },
       "microblaze_0_axi_dp": {
         "interface_ports": [
           "microblaze_0_axi_periph/S00_AXI",
           "microblaze_0/M_AXI_DP"
-        ]
-      },
-      "microblaze_0_axi_periph_M02_AXI": {
-        "interface_ports": [
-          "microblaze_0_axi_periph/M02_AXI",
-          "axi_iic_0/S_AXI"
-        ]
-      },
-      "microblaze_0_dlmb_1": {
-        "interface_ports": [
-          "microblaze_0/DLMB",
-          "microblaze_0_local_memory/DLMB"
-        ]
-      },
-      "microblaze_0_debug": {
-        "interface_ports": [
-          "mdm_1/MBDEBUG_0",
-          "microblaze_0/DEBUG"
-        ]
-      },
-      "microblaze_0_axi_periph_M01_AXI": {
-        "interface_ports": [
-          "microblaze_0_axi_periph/M01_AXI",
-          "axi_uartlite_0/S_AXI"
         ]
       },
       "microblaze_0_axi_periph_M03_AXI": {
@@ -899,16 +887,28 @@
           "myip_drone_bldc_moto_0/S00_AXI"
         ]
       },
+      "microblaze_0_ilmb_1": {
+        "interface_ports": [
+          "microblaze_0/ILMB",
+          "microblaze_0_local_memory/ILMB"
+        ]
+      },
+      "microblaze_0_dlmb_1": {
+        "interface_ports": [
+          "microblaze_0/DLMB",
+          "microblaze_0_local_memory/DLMB"
+        ]
+      },
       "microblaze_0_interrupt": {
         "interface_ports": [
           "microblaze_0_axi_intc/interrupt",
           "microblaze_0/INTERRUPT"
         ]
       },
-      "microblaze_0_ilmb_1": {
+      "microblaze_0_axi_periph_M02_AXI": {
         "interface_ports": [
-          "microblaze_0/ILMB",
-          "microblaze_0_local_memory/ILMB"
+          "microblaze_0_axi_periph/M02_AXI",
+          "axi_iic_0/S_AXI"
         ]
       }
     },
@@ -942,13 +942,13 @@
           "microblaze_0_axi_intc/s_axi_aclk",
           "microblaze_0_axi_intc/processor_clk",
           "microblaze_0_local_memory/LMB_Clk",
-          "rst_clk_wiz_0_100M/slowest_sync_clk",
-          "axi_uartlite_0/s_axi_aclk",
           "microblaze_0_axi_periph/M01_ACLK",
-          "axi_iic_0/s_axi_aclk",
           "microblaze_0_axi_periph/M02_ACLK",
           "microblaze_0_axi_periph/M03_ACLK",
-          "myip_drone_bldc_moto_0/s00_axi_aclk"
+          "axi_iic_0/s_axi_aclk",
+          "axi_uartlite_0/s_axi_aclk",
+          "myip_drone_bldc_moto_0/s00_axi_aclk",
+          "rst_clk_wiz_0_100M/slowest_sync_clk"
         ]
       },
       "clk_wiz_0_locked": {
@@ -977,11 +977,11 @@
           "microblaze_0_axi_periph/S00_ARESETN",
           "microblaze_0_axi_periph/M00_ARESETN",
           "microblaze_0_axi_intc/s_axi_aresetn",
-          "axi_uartlite_0/s_axi_aresetn",
           "microblaze_0_axi_periph/M01_ARESETN",
-          "axi_iic_0/s_axi_aresetn",
           "microblaze_0_axi_periph/M02_ARESETN",
           "microblaze_0_axi_periph/M03_ARESETN",
+          "axi_iic_0/s_axi_aresetn",
+          "axi_uartlite_0/s_axi_aresetn",
           "myip_drone_bldc_moto_0/s00_axi_aresetn"
         ]
       },
