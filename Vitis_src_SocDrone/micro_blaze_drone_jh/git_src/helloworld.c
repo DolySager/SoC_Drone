@@ -74,6 +74,10 @@ int16_t gyro_offset_x = 0;
 int16_t gyro_offset_y = 0;
 int16_t gyro_offset_z = 0;
 
+
+float gyro_rate;
+float threshold = 0.1;
+
 /***************************** pi control *********************************/
 
 float Kp_roll = 1.5;
@@ -110,7 +114,7 @@ float calculateAccelRoll(int16_t accel_x, int16_t accel_y, int16_t accel_z);
 float calculateAccelPitch(int16_t accel_x, int16_t accel_y, int16_t accel_z);
 
 void calculat_Offset(int16_t accel_data[3], int16_t gyro_data[3], int samples);
-float complementaryFilter(float angle_accel, float angle_gyro, float alpha);
+float complementaryFilter(float angle_accel, float angle_gyro, float alpha, float gyro_rate, float threshold);
 float PI_Control(float target_angle, float current_angle, float* integral, float Kp, float Ki, float dt);
 
 
@@ -142,6 +146,18 @@ int main() {
        MPU6050_ReadAccelGyro(accel_data, gyro_data);
 
 
+       // accel - Roll,Pitch
+       roll_accel = calculateAccelRoll(accel_data[0], accel_data[1], accel_data[2]);
+       pitch_accel = calculateAccelPitch(accel_data[0], accel_data[1], accel_data[2]);
+
+       // gyro - Roll,Pitch
+       roll_gyro += (gyro_data[0]) / 131.0 * dt;
+       pitch_gyro += (gyro_data[1]) / 131.0 * dt;
+
+       // Complementary Filter
+       roll_filtered = complementaryFilter(roll_accel, roll_gyro, alpha, gyro_rate, threshold);
+       pitch_filtered = complementaryFilter(pitch_accel, pitch_gyro, alpha, gyro_rate, threshold);
+
        // offset
        accel_data[0] -= accel_offset[0];
        accel_data[1] -= accel_offset[1];
@@ -151,26 +167,15 @@ int main() {
        gyro_data[1]	-= gyro_offset[1];
        gyro_data[2]	-= gyro_offset[2];
 
-
-
-
-       // accel - Roll,Pitch
-       roll_accel = calculateAccelRoll(accel_data[0], accel_data[1], accel_data[2]);
-       pitch_accel = calculateAccelPitch(accel_data[0], accel_data[1], accel_data[2]);
-
-       // gyro - Roll,Pitch
-       roll_gyro += (gyro_data[0]) / 131.0 * dt;
-       pitch_gyro += (gyro_data[1]) / 131.0 * dt;
-
-
-       // Complementary Filter
-       roll_filtered = complementaryFilter(roll_accel, roll_gyro, alpha);
-       pitch_filtered = complementaryFilter(pitch_accel, pitch_gyro, alpha);
-
+       gyro_rate = gyro_data[0];
 
 
        printf("Accel X: %d  Y: %d  Z: %d\n\r"  , accel_data[0]>>7, accel_data[1]>>7, accel_data[2]>>7);
-       printf("Gyro  X: %d  Y: %d  Z: %d\n"  , gyro_data[0]>>7,  gyro_data[1]>>7,  gyro_data[2]>>7);
+       printf("Gyro  X: %d  Y: %d  Z: %d\n\r"  , gyro_data[0]>>7,  gyro_data[1]>>7,  gyro_data[2]>>7);
+
+
+       printf("Accel  roll: %d  pitch: %d \n\r"  , roll_accel,  pitch_accel);
+       printf("Gyro   roll: %d  pitch: %d \n\r"  , roll_gyro,  pitch_gyro);
 
        MB_Sleep(100);
 
@@ -264,11 +269,20 @@ float PI_Control(float target_angle, float current_angle, float* integral, float
 
 
 /*****************************Filter************************************/
-float complementaryFilter(float angle_accel, float angle_gyro, float alpha)
-{
-    return alpha * (angle_gyro) + (1.0 - alpha) * angle_accel;
-}
 
+
+float complementaryFilter(float angle_accel, float angle_gyro, float alpha, float gyro_rate, float threshold)
+{
+    // if drone stop
+    if (fabs(gyro_rate) < threshold)
+    {
+        return angle_accel;
+    }
+    else	// if drone working
+    {
+    	return alpha * (angle_gyro) + (1.0 - alpha) * angle_accel;
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////
 
