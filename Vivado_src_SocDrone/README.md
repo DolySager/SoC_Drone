@@ -18,7 +18,7 @@
 <img alt="Vivado Link File Tutorial Step 3" src = "/README_img/vivado_linkfile_tutorial_3.png" height="320"/>
 
 #### 1-5. 리포지토리 내의 소스 파일 선택 후 "OK" 클릭
-Block Diagram의 경우에는 .bd 파일 선택 <br>
+Block Design의 경우에는 .bd 파일 선택 <br>
 Verilog 파일의 경우에는 .v 파일 선택 <br><br>
 <img alt="Vivado Link File Tutorial Step 4" src = "/README_img/vivado_linkfile_tutorial_4.png" height="320"/>
 
