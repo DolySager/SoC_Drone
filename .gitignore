@@ -13,3 +13,8 @@
 RemoteSystemsTempFiles/
 *.analytics
 IDE.log
+
+# Platform export
+**/drivers/
+*.bit
+*.mmi
