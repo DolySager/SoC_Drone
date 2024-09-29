@@ -1,1 +1,15 @@
 # Vivado & Vitis git ignore
+
+# vivado block design file
+## block design only needs .bd file
+**/bd/*/*
+!**/bd/*/*.bd
+
+#vivado general
+*.tcl
+
+# Vitis workspace file
+.metadata/
+RemoteSystemsTempFiles/
+*.analytics
+IDE.log
