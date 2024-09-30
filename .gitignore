@@ -1,12 +1,14 @@
 # Vivado & Vitis git ignore
 
-# vivado block design file
+# Vivado block design file
 ## block design only needs .bd file
 **/bd/*/*
 !**/bd/*/*.bd
 
-#vivado general
+# vivado general
+## ip repo needs .tcl file
 *.tcl
+!**/ip_repo/**/*.tcl
 
 # Vitis workspace file
 .metadata/
@@ -14,7 +16,7 @@ RemoteSystemsTempFiles/
 *.analytics
 IDE.log
 
-# Platform export
+# Platform (hardware) export 
 **/drivers/
 *.bit
 *.mmi

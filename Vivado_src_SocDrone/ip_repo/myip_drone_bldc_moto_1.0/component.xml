@@ -2,7 +2,7 @@
 <spirit:component xmlns:xilinx="http://www.xilinx.com" xmlns:spirit="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1685-2009" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <spirit:vendor>xilinx.com</spirit:vendor>
   <spirit:library>user</spirit:library>
-  <spirit:name>myip_drone_bldc_motor_ctrl</spirit:name>
+  <spirit:name>myip_drone_bldc_moto</spirit:name>
   <spirit:version>1.0</spirit:version>
   <spirit:busInterfaces>
     <spirit:busInterface>
@@ -173,7 +173,7 @@
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>WIZ_NUM_REG</spirit:name>
-          <spirit:value spirit:format="long" spirit:id="BUSIFPARAM_VALUE.S00_AXI.WIZ_NUM_REG" spirit:minimum="4" spirit:maximum="512" spirit:rangeType="long">8</spirit:value>
+          <spirit:value spirit:format="long" spirit:id="BUSIFPARAM_VALUE.S00_AXI.WIZ_NUM_REG" spirit:minimum="4" spirit:maximum="512" spirit:rangeType="long">4</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>SUPPORTS_NARROW_BURST</spirit:name>
@@ -199,7 +199,7 @@
       <spirit:parameters>
         <spirit:parameter>
           <spirit:name>POLARITY</spirit:name>
-          <spirit:value spirit:id="BUSIFPARAM_VALUE.S00_AXI_RST.POLARITY" spirit:choiceRef="choice_list_9d8b0d81">ACTIVE_LOW</spirit:value>
+          <spirit:value spirit:id="BUSIFPARAM_VALUE.S00_AXI_RST.POLARITY" spirit:choiceRef="choice_list_74b5137e">ACTIVE_LOW</spirit:value>
         </spirit:parameter>
       </spirit:parameters>
     </spirit:busInterface>
@@ -266,7 +266,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>4f39db9e</spirit:value>
+            <spirit:value>24c04b82</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -282,7 +282,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>4f39db9e</spirit:value>
+            <spirit:value>24c04b82</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -296,7 +296,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>c6885a03</spirit:value>
+            <spirit:value>310ea836</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -678,7 +678,7 @@
       <spirit:enumeration>32</spirit:enumeration>
     </spirit:choice>
     <spirit:choice>
-      <spirit:name>choice_list_9d8b0d81</spirit:name>
+      <spirit:name>choice_list_74b5137e</spirit:name>
       <spirit:enumeration>ACTIVE_HIGH</spirit:enumeration>
       <spirit:enumeration>ACTIVE_LOW</spirit:enumeration>
     </spirit:choice>
@@ -692,15 +692,15 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>src/controler.v</spirit:name>
+        <spirit:name>src/controller.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/myip_drone_bldc_motor_ctrl_v1_0_S00_AXI.v</spirit:name>
+        <spirit:name>hdl/myip_drone_bldc_moto_v1_0_S00_AXI.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/myip_drone_bldc_motor_ctrl_v1_0.v</spirit:name>
+        <spirit:name>hdl/myip_drone_bldc_moto_v1_0.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>CHECKSUM_5bac760f</spirit:userFileType>
       </spirit:file>
@@ -708,46 +708,46 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>src/controler.v</spirit:name>
+        <spirit:name>src/controller.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/myip_drone_bldc_motor_ctrl_v1_0_S00_AXI.v</spirit:name>
+        <spirit:name>hdl/myip_drone_bldc_moto_v1_0_S00_AXI.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/myip_drone_bldc_motor_ctrl_v1_0.v</spirit:name>
+        <spirit:name>hdl/myip_drone_bldc_moto_v1_0.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
       <spirit:name>xilinx_softwaredriver_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>drivers/myip_drone_bldc_motor_ctrl_v1_0/data/myip_drone_bldc_motor_ctrl.mdd</spirit:name>
+        <spirit:name>drivers/myip_drone_bldc_moto_v1_0/data/myip_drone_bldc_moto.mdd</spirit:name>
         <spirit:userFileType>mdd</spirit:userFileType>
         <spirit:userFileType>driver_mdd</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/myip_drone_bldc_motor_ctrl_v1_0/data/myip_drone_bldc_motor_ctrl.tcl</spirit:name>
+        <spirit:name>drivers/myip_drone_bldc_moto_v1_0/data/myip_drone_bldc_moto.tcl</spirit:name>
         <spirit:fileType>tclSource</spirit:fileType>
         <spirit:userFileType>driver_tcl</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/myip_drone_bldc_motor_ctrl_v1_0/src/Makefile</spirit:name>
+        <spirit:name>drivers/myip_drone_bldc_moto_v1_0/src/Makefile</spirit:name>
         <spirit:userFileType>driver_src</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/myip_drone_bldc_motor_ctrl_v1_0/src/myip_drone_bldc_motor_ctrl.h</spirit:name>
+        <spirit:name>drivers/myip_drone_bldc_moto_v1_0/src/myip_drone_bldc_moto.h</spirit:name>
         <spirit:fileType>cSource</spirit:fileType>
         <spirit:userFileType>driver_src</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/myip_drone_bldc_motor_ctrl_v1_0/src/myip_drone_bldc_motor_ctrl.c</spirit:name>
+        <spirit:name>drivers/myip_drone_bldc_moto_v1_0/src/myip_drone_bldc_moto.c</spirit:name>
         <spirit:fileType>cSource</spirit:fileType>
         <spirit:userFileType>driver_src</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/myip_drone_bldc_motor_ctrl_v1_0/src/myip_drone_bldc_motor_ctrl_selftest.c</spirit:name>
+        <spirit:name>drivers/myip_drone_bldc_moto_v1_0/src/myip_drone_bldc_moto_selftest.c</spirit:name>
         <spirit:fileType>cSource</spirit:fileType>
         <spirit:userFileType>driver_src</spirit:userFileType>
       </spirit:file>
@@ -755,7 +755,7 @@
     <spirit:fileSet>
       <spirit:name>xilinx_xpgui_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>xgui/myip_drone_bldc_motor_ctrl_v1_0.tcl</spirit:name>
+        <spirit:name>xgui/myip_drone_bldc_moto_v1_0.tcl</spirit:name>
         <spirit:fileType>tclSource</spirit:fileType>
         <spirit:userFileType>CHECKSUM_0e5443b4</spirit:userFileType>
         <spirit:userFileType>XGUI_VERSION_2</spirit:userFileType>
@@ -823,7 +823,7 @@
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>Component_Name</spirit:name>
-      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">myip_drone_bldc_motor_ctrl_v1_0</spirit:value>
+      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">myip_drone_bldc_moto_v1_0</spirit:value>
     </spirit:parameter>
   </spirit:parameters>
   <spirit:vendorExtensions>
@@ -834,80 +834,52 @@
       <xilinx:taxonomies>
         <xilinx:taxonomy>AXI_Peripheral</xilinx:taxonomy>
       </xilinx:taxonomies>
-      <xilinx:displayName>myip_drone_bldc_motor_ctrl_v1.0</xilinx:displayName>
-      <xilinx:coreRevision>4</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2024-09-28T05:36:12Z</xilinx:coreCreationDateTime>
+      <xilinx:displayName>myip_drone_bldc_moto_ctrl_v1.0</xilinx:displayName>
+      <xilinx:coreRevision>3</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2024-09-29T08:48:38Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@ad98086_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@2609177_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@4300eff2_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@2415d9bd_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@1a09d804_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@6540dd0c_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@8018908_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@3c04d535_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@162909dc_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@17caf1ec_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@3d4a8e08_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@78651a25_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@7706c2ed_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@60a882f5_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@6fbe394f_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@50f2a52c_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@1365bac6_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@4fd4fba4_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@e96bfe4_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@72ac1e13_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@71cc9d55_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@7929c32a_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@24731148_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@23c31aec_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@6f7c5f80_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@6cc859eb_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@30cdff62_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@4806747a_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@27db52f5_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@64b91287_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@41c729d5_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@f5c3c40_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@2d783c40_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@1c78fcd3_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@32b99f95_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@78fa24d8_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@47f2832e_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@6e17a0e6_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@2f89ddd2_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@6b96c39b_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@aac0926_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@67b950b_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@16ec1d8a_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@2727ac91_ARCHIVE_LOCATION">d:/Vivado/2024/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@6c86f005_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@6a2a9bda_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@1bf71cc5_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@2cfdbeed_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@2c02e733_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@2ef76c84_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@3d019674_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@5d8223bb_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@75d002e_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@28efd685_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@29fba6c9_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@78f723ee_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@26719de6_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@368068a8_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@1db976d_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
-        <xilinx:tag xilinx:name="ui.data.coregen.dd@68936557_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_motor_ctrl_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@5aef551f_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@15004787_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@2af4ad4d_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@6a866570_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@60fcf8ce_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@7ab04598_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@74e7c31f_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@210b017b_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@4316d753_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@1ebb93fe_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@354dd30_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@5368a5c2_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@23359190_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@71bfdeec_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@3b613b7f_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@359f9b1_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@662402e8_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@b823b1e_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@1ef4c300_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@1f4c34da_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@32c6f5e6_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@3cc973ff_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@2f71c8cc_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@4d354551_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@6d17d3ee_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@71d31d6_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@4101e8d3_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@5c17c996_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@662ee6d2_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@3c119f1d_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@32aba54c_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
+        <xilinx:tag xilinx:name="ui.data.coregen.dd@5acff7b1_ARCHIVE_LOCATION">d:/lany_workspace/Git/SoC_Drone/Vivado_src_SocDrone/ip_repo/myip_drone_bldc_moto_1.0</xilinx:tag>
       </xilinx:tags>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2019.2</xilinx:xilinxVersion>
-      <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="206b0a70"/>
+      <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="7a6aebf4"/>
       <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="ed1368d5"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="23998b62"/>
-      <xilinx:checksum xilinx:scope="ports" xilinx:value="78e4a7b8"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="b4227827"/>
+      <xilinx:checksum xilinx:scope="ports" xilinx:value="18f94d7d"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="2e811c89"/>
-      <xilinx:checksum xilinx:scope="parameters" xilinx:value="0c8db5ea"/>
+      <xilinx:checksum xilinx:scope="parameters" xilinx:value="a5fd0f77"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>
 </spirit:component>
