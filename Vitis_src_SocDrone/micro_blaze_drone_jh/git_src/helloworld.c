@@ -20,6 +20,7 @@
 
 XUartLite 	uart_intance;
 
+#define SAMPLING_PERIOD_S 0.05	//sampling period in second
 
 /************************ Interrupt Related ***************************/
 #define INTC_ID XPAR_INTC_SINGLE_DEVICE_ID
@@ -34,14 +35,13 @@ volatile unsigned int* timer_intr_reg;
 #define IIC_ID 					XPAR_IIC_0_DEVICE_ID
 #define IIC_BASEADDR			XPAR_IIC_0_BASEADDR
 
-static u8 I2C_LCD_Data;
 XIic iic_instance;
 
 
 #define MPU6050_ADDR		    0x68
 
 #define BLDC_MOTOR_BASEADDR 	XPAR_MYIP_DRONE_BLDC_MOTO_0_S00_AXI_BASEADDR
-volatile u8* motor_power_reg;
+volatile s16* motor_power_reg;
 
 /***************************** LCD define *********************************/
 
@@ -156,7 +156,7 @@ int main() {
     myip_timerInterrupt_init();
     print("Start!\n\r");
 
-    motor_power_reg = (volatile u8*) BLDC_MOTOR_BASEADDR;
+    motor_power_reg = (volatile s16*) BLDC_MOTOR_BASEADDR;
 
     XUartLite_Initialize(&uart_intance, UART_ID);
     XIic_Initialize(&iic_instance, IIC_ID);
@@ -188,51 +188,14 @@ int main() {
     XUartLite_SetSendHandler(&uart_intance, SendHandler, &uart_intance);
     XUartLite_EnableInterrupt(&uart_intance);
 
-	/********** JH code  ***********/
-
-    // read accel, gyro data
-	//MPU6050_ReadAccelGyro(accel_data, gyro_data);
-
-
-	// accel - Roll,Pitch
-	roll_accel = calculateAccelRoll(accel_data[0], accel_data[1], accel_data[2]);
-	pitch_accel = calculateAccelPitch(accel_data[0], accel_data[1], accel_data[2]);
-
-	// gyro - Roll,Pitch
-	roll_gyro += (gyro_data[0]) / 131.0 * dt;
-	pitch_gyro += (gyro_data[1]) / 131.0 * dt;
-
-	// Complementary Filter
-	roll_filtered = complementaryFilter(roll_accel, roll_gyro, alpha, gyro_rate, threshold);
-	pitch_filtered = complementaryFilter(pitch_accel, pitch_gyro, alpha, gyro_rate, threshold);
-
-	// offset
-	accel_data[0] -= accel_offset[0];
-	accel_data[1] -= accel_offset[1];
-	accel_data[2] -= accel_offset[2];
-
-	gyro_data[0]	-= gyro_offset[0];
-	gyro_data[1]	-= gyro_offset[1];
-	gyro_data[2]	-= gyro_offset[2];
-
-	gyro_rate = gyro_data[0];
-
-
-//	printf("Accel X: %d  Y: %d  Z: %d\n\r"  , accel_data[0]>>7, accel_data[1]>>7, accel_data[2]>>7);
-//	printf("Gyro  X: %d  Y: %d  Z: %d\n\r"  , gyro_data[0]>>7,  gyro_data[1]>>7,  gyro_data[2]>>7);
-//
-//
-//	printf("Accel  roll: %d  pitch: %d \n\r"  , roll_accel,  pitch_accel);
-//	printf("Gyro   roll: %d  pitch: %d \n\r"  , roll_gyro,  pitch_gyro);
-
-	MB_Sleep(100);
-
     // motor middle value
-    motor_power_reg[0] = 0xf;
-    motor_power_reg[1] = 0xf;
-    motor_power_reg[2] = 0xf;
-    motor_power_reg[3] = 0xf;
+    motor_power_reg[0] = 0;
+    motor_power_reg[1] = 0;
+    motor_power_reg[2] = 0;
+    motor_power_reg[3] = 0;
 
+    myip_timerInterrupt_setInterval_us (SAMPLING_PERIOD_S * 1000000);
+    myip_timerInterrupt_start ();
 
     while(1)
     {
@@ -242,8 +205,6 @@ int main() {
     cleanup_platform();
     return 0;
 }
-
-
 
 
 
@@ -328,12 +289,6 @@ void calculate_Offset(int16_t accel_data[3], int16_t gyro_data[3], int samples)
 }
 
 
-
-
-
-
-
-
 /***************************** MPU 6050 function ********************************/
 
 
@@ -381,27 +336,17 @@ void RecvHandler(void *CallBackRef, unsigned int EventData){
 }
 
 
-
-
-
-
 void timer_intr_handler(void *CallBackRef)
 {
 	static float integral_roll, integral_pitch;
-	static int count = 0;
-	count++;
 
-	if (count >= 100)
-	{
-		count = 0;
+	/********* JH code  **********/
 
-		/********** JH code  ***********/
-
-	   // read accel, gyro data
-	   MPU6050_ReadAccelGyro(accel_data, gyro_data);
+   // read accel, gyro data
+   MPU6050_ReadAccelGyro(accel_data, gyro_data);
 
 
-	   // offset
+   // offset
 //	   accel_data[0] -= accel_offset[0];
 //	   accel_data[1] -= accel_offset[1];
 //	   accel_data[2] -= accel_offset[2];
@@ -411,51 +356,48 @@ void timer_intr_handler(void *CallBackRef)
 //	   gyro_data[2]	-= gyro_offset[2];
 
 
-	   // accel - Roll,Pitch
-	   roll_accel = calculateAccelRoll(accel_data[0], accel_data[1], accel_data[2]);
-	   pitch_accel = calculateAccelPitch(accel_data[0], accel_data[1], accel_data[2]);
+   // accel - Roll,Pitch
+   roll_accel = calculateAccelRoll(accel_data[0], accel_data[1], accel_data[2]);
+   pitch_accel = calculateAccelPitch(accel_data[0], accel_data[1], accel_data[2]);
 
-	   // gyro - Roll,Pitch
+   // gyro - Roll,Pitch
 //	   roll_gyro += (gyro_data[0]) / 131.0 * dt;
 //	   pitch_gyro += (gyro_data[1]) / 131.0 * dt;
 
 
-	   // Complementary Filter
+   // Complementary Filter
 //	   roll_filtered = complementaryFilter(roll_accel, roll_gyro, alpha);
 //	   pitch_filtered = complementaryFilter(pitch_accel, pitch_gyro, alpha);
-	   roll_filtered = roll_accel;
-	   pitch_filtered = pitch_accel;
+   roll_filtered = roll_accel;
+   pitch_filtered = pitch_accel;
 
-	   //printf("Accel X: %d  Y: %d  Z: %d\n\r"  , accel_data[0]>>7, accel_data[1]>>7, accel_data[2]>>7);
-	   //printf("Gyro  X: %d  Y: %d  Z: %d\n"  , gyro_data[0]>>7,  gyro_data[1]>>7,  gyro_data[2]>>7);
+   //printf("Accel X: %d  Y: %d  Z: %d\n\r"  , accel_data[0]>>7, accel_data[1]>>7, accel_data[2]>>7);
+   //printf("Gyro  X: %d  Y: %d  Z: %d\n"  , gyro_data[0]>>7,  gyro_data[1]>>7,  gyro_data[2]>>7);
 
-	   float error_roll, error_pitch;
-	   error_roll = PI_Control(0, roll_filtered, &integral_roll, 1.0, 0.0, 0.1);
-	   error_pitch = PI_Control(0, pitch_filtered, &integral_pitch, 1.0, 0.0, 0.1);
+   float error_roll, error_pitch;
+   error_roll = PI_Control(0, roll_filtered, &integral_roll, 0.5, 0.1, SAMPLING_PERIOD_S);
+   error_pitch = PI_Control(0, pitch_filtered, &integral_pitch, 0.5, 0.1, SAMPLING_PERIOD_S);
 
-	   printf("roll: %5.5f pitch: %5.5f\r\n", error_roll, error_pitch);
-
-	   /*
-	    * 0   1
-	    *   o
-	    * 2   3
-	    */
-
-	   u8 motor0, motor1, motor2, motor3;
-	   motor0 = (u8) ((float) motor_power_reg[0] + error_roll + error_pitch);
-	   motor1 = (u8) ((float) motor_power_reg[1] - error_roll + error_pitch);
-	   motor2 = (u8) ((float) motor_power_reg[2] + error_roll - error_pitch);
-	   motor3 = (u8) ((float) motor_power_reg[3] - error_roll - error_pitch);
-
-	   motor_power_reg[0] = motor0;
-	   motor_power_reg[1] = motor1;
-	   motor_power_reg[2] = motor2;
-	   motor_power_reg[3] = motor3;
-
-	   static unsigned int interval;
-	   interval = interval + 1000;
-	   myip_timerInterrupt_setInterval_us (1000);
-	}
+   //printf("roll: %5.5f pitch: %5.5f\r\n", error_roll, error_pitch);
 
 
+   /*
+	* 		 0   1
+	* sensor x
+	* 		 2   3
+	*/
+
+   motor_power_reg[0] = (s16) ((float) motor_power_reg[0] + error_roll + error_pitch);
+   motor_power_reg[1] = (s16) ((float) motor_power_reg[1] - error_roll + error_pitch);
+   motor_power_reg[2] = (s16) ((float) motor_power_reg[2] + error_roll - error_pitch);
+   motor_power_reg[3] = (s16) ((float) motor_power_reg[3] - error_roll - error_pitch);
+
+   for (u8 i=0; i<4; i++)
+   {
+	   if (motor_power_reg[i] > 255) motor_power_reg[i] = 255;
+	   else if (motor_power_reg[i] < 0) motor_power_reg[i] = 0;
+
+   }
+
+   printf("%03.3f %03.3f / %03.3f %03.3f / %3d %3d %3d %3d\n\r", roll_filtered, pitch_filtered, error_roll, error_pitch, motor_power_reg[0], motor_power_reg[1], motor_power_reg[2], motor_power_reg[3]);
 }
