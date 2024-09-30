@@ -6,8 +6,20 @@
 #include "math.h"
 #include "xintc.h"
 #include "xil_exception.h"
+#include "xuartlite.h"
 
 #include "timer_interrupt.h"
+
+
+/************************ UART (+ Interrupt) ***************************/
+
+#define UART_ID 		XPAR_UARTLITE_0_DEVICE_ID
+#define UART_VEC_ID 	XPAR_INTC_0_UARTLITE_0_VEC_ID
+
+#define INCT_ID XPAR_MICROBLAZE_0_AXI_INTC_DEVICE_ID
+
+XUartLite 	uart_intance;
+
 
 /************************ Interrupt Related ***************************/
 #define INTC_ID XPAR_INTC_SINGLE_DEVICE_ID
@@ -129,6 +141,11 @@ float complementaryFilter(float angle_accel, float angle_gyro, float alpha, floa
 
 float PI_Control(float target_angle, float current_angle, float* integral, float Kp, float Ki, float dt);
 
+
+void SendHandler(void *CallBackRef, unsigned int EventData);
+void RecvHandler(void *CallBackRef, unsigned int EventData);
+
+
 void timer_intr_handler(void *CallBackRef);
 
 
@@ -141,7 +158,9 @@ int main() {
 
     motor_power_reg = (volatile u8*) BLDC_MOTOR_BASEADDR;
 
+    XUartLite_Initialize(&uart_intance, UART_ID);
     XIic_Initialize(&iic_instance, IIC_ID);
+
     MPU6050_Init();
 
 //    LCD_Init();
@@ -149,7 +168,8 @@ int main() {
 //    LCD_GotoXY(1, 0);
 //    LCD_WriteString("G: ");
 
-    calculate_Offset(accel_data, gyro_data, 500);	//when the device start, it averages 500
+  // calculate_Offset(accel_data, gyro_data, 500);	//when the device start, it averages 500
+
 
 	// Interrupt init
 	XIntc_Initialize(&intc_instance, INTC_ID);
@@ -161,10 +181,17 @@ int main() {
     Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT, (Xil_ExceptionHandler) XIntc_InterruptHandler, (void *) &intc_instance);
     Xil_ExceptionEnable();
 
+    XIntc_Connect(&intc_instance, UART_VEC_ID, (XInterruptHandler)XUartLite_InterruptHandler, (void *)&uart_intance);
+    XIntc_Enable(&intc_instance, UART_VEC_ID);
+
+    XUartLite_SetRecvHandler(&uart_intance, RecvHandler, &uart_intance);
+    XUartLite_SetSendHandler(&uart_intance, SendHandler, &uart_intance);
+    XUartLite_EnableInterrupt(&uart_intance);
+
 	/********** JH code  ***********/
 
     // read accel, gyro data
-	MPU6050_ReadAccelGyro(accel_data, gyro_data);
+	//MPU6050_ReadAccelGyro(accel_data, gyro_data);
 
 
 	// accel - Roll,Pitch
@@ -191,12 +218,12 @@ int main() {
 	gyro_rate = gyro_data[0];
 
 
-	printf("Accel X: %d  Y: %d  Z: %d\n\r"  , accel_data[0]>>7, accel_data[1]>>7, accel_data[2]>>7);
-	printf("Gyro  X: %d  Y: %d  Z: %d\n\r"  , gyro_data[0]>>7,  gyro_data[1]>>7,  gyro_data[2]>>7);
-
-
-	printf("Accel  roll: %d  pitch: %d \n\r"  , roll_accel,  pitch_accel);
-	printf("Gyro   roll: %d  pitch: %d \n\r"  , roll_gyro,  pitch_gyro);
+//	printf("Accel X: %d  Y: %d  Z: %d\n\r"  , accel_data[0]>>7, accel_data[1]>>7, accel_data[2]>>7);
+//	printf("Gyro  X: %d  Y: %d  Z: %d\n\r"  , gyro_data[0]>>7,  gyro_data[1]>>7,  gyro_data[2]>>7);
+//
+//
+//	printf("Accel  roll: %d  pitch: %d \n\r"  , roll_accel,  pitch_accel);
+//	printf("Gyro   roll: %d  pitch: %d \n\r"  , roll_gyro,  pitch_gyro);
 
 	MB_Sleep(100);
 
@@ -206,8 +233,6 @@ int main() {
     motor_power_reg[2] = 0xf;
     motor_power_reg[3] = 0xf;
 
-    myip_timerInterrupt_setInterval_us (1000);
-    myip_timerInterrupt_start ();
 
     while(1)
     {
@@ -344,81 +369,21 @@ void MPU6050_Init(void) {
 }
 
 
+void SendHandler(void *CallBackRef, unsigned int EventData){
 
-/***************************** LCD function ********************************/
+	return;
+}
+void RecvHandler(void *CallBackRef, unsigned int EventData){
+	u8 rxData;
+	XUartLite_Recv(&uart_intance, &rxData, 1);
+	xil_printf("recv %c\n\r", rxData);
+	return;
+}
 
-//void LCD_Data_4bit (u8 data)
-//{
-//	I2C_LCD_Data = (I2C_LCD_Data & 0x0f) | (data & 0xf0);		// put upper four bits
-//	LCD_EnablePin();
-//	I2C_LCD_Data = (I2C_LCD_Data & 0x0f) | ((data & 0x0f)<<4);	// put lower four bits
-//	LCD_EnablePin();
-//
-//}
-//
-//void LCD_EnablePin()
-//{
-//	I2C_LCD_Data &= ~(1<<LCD_E);
-//	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
-//	I2C_LCD_Data |= (1<<LCD_E);
-//	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
-//	I2C_LCD_Data &= ~(1<<LCD_E);
-//	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
-//	MB_Sleep(2);
-//}
-//
-//void LCD_WriteCommand(uint8_t commandData)
-//{
-//	I2C_LCD_Data &= ~(1<<LCD_RS);					// enter instruction code mode
-//	I2C_LCD_Data &= ~(1<<LCD_RW);					// enter write mode
-//	LCD_Data_4bit(commandData);						// output data
-//}
-//void LCD_WriteData(uint8_t charData)
-//{
-//	I2C_LCD_Data |= (1<<LCD_RS);						// enter data mode
-//	I2C_LCD_Data &= ~(1<<LCD_RW);						// enter write mode
-//	LCD_Data_4bit(charData);						// output data
-//}
-//void LCD_Init()
-//{
-//	// see HD44780 datasheet page 45 for following init commands
-//	MB_Sleep(20);
-//	LCD_WriteCommand(0x03);
-//	MB_Sleep(5);
-//	LCD_WriteCommand(0x03);
-//	MB_Sleep(1);
-//	LCD_WriteCommand(0x03);
-//
-//	LCD_WriteCommand(0x02);
-//	LCD_WriteCommand(COMMAND_4BIT_MODE);
-//	LCD_WriteCommand(COMMAND_DISPLAY_OFF);
-//	LCD_WriteCommand(COMMAND_DISPLAY_CLEAR);
-//	LCD_WriteCommand(COMMAND_ENTRY_MODE);
-//	LCD_WriteCommand(COMMAND_DISPLAY_ON);
-//	LCD_BackLightOn();
-//}
-//void LCD_BackLightOn()
-//{
-//	I2C_LCD_Data |= (1<<LCD_BACKLIGHT);
-//
-//}
-//
-//void LCD_GotoXY(uint8_t row, uint8_t col)
-//{
-//	col %= 16;										// column width is within 16
-//	row %= 2;										// row length is within 2
-//	uint8_t address = (0x40 * row) + col;			// see HD44780 datasheet page 12
-//	uint8_t command = 0x80 + address;
-//	LCD_WriteCommand(command);
-//}
-//
-//void LCD_WriteString(char *string)
-//{
-//	for (uint8_t i = 0; string[i]; i++)
-//	{
-//		LCD_WriteData(string[i]);
-//	}
-//}
+
+
+
+
 
 void timer_intr_handler(void *CallBackRef)
 {
