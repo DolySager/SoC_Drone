@@ -7,6 +7,8 @@
 #include "xintc.h"
 #include "xil_exception.h"
 
+#include "timer_interrupt.h"
+
 /************************ Interrupt Related ***************************/
 #define INTC_ID XPAR_INTC_SINGLE_DEVICE_ID
 #define TIMER_INTR_VEC_ID XPAR_INTC_0_MYIP_TIMER_INTERRUPT_0_VEC_ID
@@ -134,17 +136,13 @@ void timer_intr_handler(void *CallBackRef);
 int main() {
 
     init_platform();
+    myip_timerInterrupt_init();
     print("Start!\n\r");
 
     motor_power_reg = (volatile u8*) BLDC_MOTOR_BASEADDR;
-    timer_intr_reg = (volatile unsigned int*) TIMER_INTR_BASEADDR;
-
-    timer_intr_reg[0] = 1;
 
     XIic_Initialize(&iic_instance, IIC_ID);
     MPU6050_Init();
-
-
 
 //    LCD_Init();
 //    LCD_WriteString("A: ");
@@ -163,46 +161,44 @@ int main() {
     Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT, (Xil_ExceptionHandler) XIntc_InterruptHandler, (void *) &intc_instance);
     Xil_ExceptionEnable();
 
-    timer_intr_reg[0] = 0;
+	/********** JH code  ***********/
 
-    	/********** JH code  ***********/
-
-       // read accel, gyro data
-       MPU6050_ReadAccelGyro(accel_data, gyro_data);
+    // read accel, gyro data
+	MPU6050_ReadAccelGyro(accel_data, gyro_data);
 
 
-       // accel - Roll,Pitch
-       roll_accel = calculateAccelRoll(accel_data[0], accel_data[1], accel_data[2]);
-       pitch_accel = calculateAccelPitch(accel_data[0], accel_data[1], accel_data[2]);
+	// accel - Roll,Pitch
+	roll_accel = calculateAccelRoll(accel_data[0], accel_data[1], accel_data[2]);
+	pitch_accel = calculateAccelPitch(accel_data[0], accel_data[1], accel_data[2]);
 
-       // gyro - Roll,Pitch
-       roll_gyro += (gyro_data[0]) / 131.0 * dt;
-       pitch_gyro += (gyro_data[1]) / 131.0 * dt;
+	// gyro - Roll,Pitch
+	roll_gyro += (gyro_data[0]) / 131.0 * dt;
+	pitch_gyro += (gyro_data[1]) / 131.0 * dt;
 
-       // Complementary Filter
-       roll_filtered = complementaryFilter(roll_accel, roll_gyro, alpha, gyro_rate, threshold);
-       pitch_filtered = complementaryFilter(pitch_accel, pitch_gyro, alpha, gyro_rate, threshold);
+	// Complementary Filter
+	roll_filtered = complementaryFilter(roll_accel, roll_gyro, alpha, gyro_rate, threshold);
+	pitch_filtered = complementaryFilter(pitch_accel, pitch_gyro, alpha, gyro_rate, threshold);
 
-       // offset
-       accel_data[0] -= accel_offset[0];
-       accel_data[1] -= accel_offset[1];
-       accel_data[2] -= accel_offset[2];
+	// offset
+	accel_data[0] -= accel_offset[0];
+	accel_data[1] -= accel_offset[1];
+	accel_data[2] -= accel_offset[2];
 
-       gyro_data[0]	-= gyro_offset[0];
-       gyro_data[1]	-= gyro_offset[1];
-       gyro_data[2]	-= gyro_offset[2];
+	gyro_data[0]	-= gyro_offset[0];
+	gyro_data[1]	-= gyro_offset[1];
+	gyro_data[2]	-= gyro_offset[2];
 
-       gyro_rate = gyro_data[0];
-
-
-       printf("Accel X: %d  Y: %d  Z: %d\n\r"  , accel_data[0]>>7, accel_data[1]>>7, accel_data[2]>>7);
-       printf("Gyro  X: %d  Y: %d  Z: %d\n\r"  , gyro_data[0]>>7,  gyro_data[1]>>7,  gyro_data[2]>>7);
+	gyro_rate = gyro_data[0];
 
 
-       printf("Accel  roll: %d  pitch: %d \n\r"  , roll_accel,  pitch_accel);
-       printf("Gyro   roll: %d  pitch: %d \n\r"  , roll_gyro,  pitch_gyro);
+	printf("Accel X: %d  Y: %d  Z: %d\n\r"  , accel_data[0]>>7, accel_data[1]>>7, accel_data[2]>>7);
+	printf("Gyro  X: %d  Y: %d  Z: %d\n\r"  , gyro_data[0]>>7,  gyro_data[1]>>7,  gyro_data[2]>>7);
 
-       MB_Sleep(100);
+
+	printf("Accel  roll: %d  pitch: %d \n\r"  , roll_accel,  pitch_accel);
+	printf("Gyro   roll: %d  pitch: %d \n\r"  , roll_gyro,  pitch_gyro);
+
+	MB_Sleep(100);
 
     // motor middle value
     motor_power_reg[0] = 0xf;
@@ -210,71 +206,11 @@ int main() {
     motor_power_reg[2] = 0xf;
     motor_power_reg[3] = 0xf;
 
+    myip_timerInterrupt_setInterval_us (1000);
+    myip_timerInterrupt_start ();
 
     while(1)
     {
-
-/*
-	       ////////////////- lcd data output -/////////////////
-
-	        // top bit shift (16 bit -> 8 bit)
-	        u8 accel_minus[3] = {0};
-	        u8 gyro_minus[3] = {0};
-
-
-	 		accel_data[0] = accel_data[0] >> 8;
-	        accel_data[1] = accel_data[1] >> 8;
-	        accel_data[2] = accel_data[2] >> 8;
-
-	        gyro_data[0] = gyro_data[0] >> 8;
-	        gyro_data[1] = gyro_data[1] >> 8;
-	        gyro_data[2] = gyro_data[2] >> 8;
-
-
-	        //xil_printf("Accel X: %d, Y: %d, Z: %d\n", accel_data[0], accel_data[1], accel_data[2]);
-	        //xil_printf("Gyro X: %d, Y: %d, Z: %d\n", gyro_data[0], gyro_data[1], gyro_data[2]);
-
-
-	        // check data code (+-)
-	        for (int i=0; i<3; i++)
-	        {
-	            if (accel_data[i] < 0)
-	    		{
-	            	accel_minus[i] = 1;
-	            	accel_data[i] = -accel_data[i];
-	    		}
-	            else accel_minus[i] = 0;
-
-	            if (gyro_data[i] < 0)
-	    		{
-	            	gyro_minus[i] = 1;
-	            	gyro_data[i] = -gyro_data[i];
-	    		}
-	            else gyro_minus[i] = 0;
-	        }
-
-
-	        // lcd_data_output
-	        for (int i=0; i<3; i++)
-	        {
-	            LCD_GotoXY(0, (2 + 5*i));
-	            if (accel_minus[i]) LCD_WriteData('-');
-	            else LCD_WriteData(' ');
-	            LCD_WriteData(accel_data[i]/100%10 + '0');
-	            LCD_WriteData(accel_data[i]/10%10 + '0');
-	            LCD_WriteData(accel_data[i]/1%10 + '0');
-	        }
-
-	        for (int i=0; i<3; i++)
-	        {
-	            LCD_GotoXY(1, (2 + 5*i));
-	            if (gyro_minus[i]) LCD_WriteData('-');
-	            else LCD_WriteData(' ');
-	            LCD_WriteData(gyro_data[i]/100%10 + '0');
-	            LCD_WriteData(gyro_data[i]/10%10 + '0');
-	            LCD_WriteData(gyro_data[i]/1%10 + '0');
-	        }
-*/
 
     }
 
@@ -550,6 +486,10 @@ void timer_intr_handler(void *CallBackRef)
 	   motor_power_reg[1] = motor1;
 	   motor_power_reg[2] = motor2;
 	   motor_power_reg[3] = motor3;
+
+	   static unsigned int interval;
+	   interval = interval + 1000;
+	   myip_timerInterrupt_setInterval_us (1000);
 	}
 
 

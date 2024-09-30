@@ -4,7 +4,7 @@
 	module myip_timer_interrupt_v1_0 #
 	(
 		// Users to add parameters here
-        parameter INTRPT_INTERVAL_US = 1_000,
+
 		// User parameters ends
 		// Do not modify the parameters beyond this line
 
@@ -45,7 +45,6 @@
 	);
 // Instantiation of Axi Bus Interface S00_AXI
 	myip_timer_interrupt_v1_0_S00_AXI # ( 
-	    .INTRPT_INTERVAL_US(INTRPT_INTERVAL_US),
 		.C_S_AXI_DATA_WIDTH(C_S00_AXI_DATA_WIDTH),
 		.C_S_AXI_ADDR_WIDTH(C_S00_AXI_ADDR_WIDTH)
 	) myip_timer_interrupt_v1_0_S00_AXI_inst (

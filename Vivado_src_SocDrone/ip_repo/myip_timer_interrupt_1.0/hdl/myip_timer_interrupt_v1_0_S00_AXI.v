@@ -4,8 +4,7 @@
 	module myip_timer_interrupt_v1_0_S00_AXI #
 	(
 		// Users to add parameters here
-        parameter INTRPT_INTERVAL_US = 1_000,   // Timer interrupt interval in us
-        localparam SYSCLK_CNT_INTRPT = INTRPT_INTERVAL_US * 100,    // needed sysclk to count the above time interval
+
 		// User parameters ends
 		// Do not modify the parameters beyond this line
 
@@ -399,15 +398,15 @@
 	end    
 
 	// Add user logic here
-    reg [$clog2(SYSCLK_CNT_INTRPT):0] sysclk_cnt;
+    integer sysclk_cnt;
     always @( posedge S_AXI_ACLK or negedge S_AXI_ARESETN) begin
         if (~S_AXI_ARESETN) begin
             sysclk_cnt = 0;
         end
         else begin
-            if (!slv_reg0) begin
+            if (slv_reg0) begin
                 sysclk_cnt = sysclk_cnt + 1;
-                if (sysclk_cnt >= SYSCLK_CNT_INTRPT) begin
+                if (sysclk_cnt >= slv_reg1) begin
                     sysclk_cnt = 0;
                     timer_intr = 1;
                 end
