@@ -4,7 +4,16 @@
 #include "xparameters.h"
 #include "xiic.h"
 #include "math.h"
+#include "xintc.h"
+#include "xil_exception.h"
 
+/************************ Interrupt Related ***************************/
+#define INTC_ID XPAR_INTC_SINGLE_DEVICE_ID
+#define TIMER_INTR_VEC_ID XPAR_INTC_0_MYIP_TIMER_INTERRUPT_0_VEC_ID
+#define TIMER_INTR_BASEADDR XPAR_MYIP_TIMER_INTERRUPT_0_S00_AXI_BASEADDR
+
+XIntc intc_instance;
+volatile unsigned int* timer_intr_reg;
 
 /************************ IIC/MPU/MOTOR - ADDR ***************************/
 
@@ -18,7 +27,7 @@ XIic iic_instance;
 #define MPU6050_ADDR		    0x68
 
 #define BLDC_MOTOR_BASEADDR 	XPAR_MYIP_DRONE_BLDC_MOTO_0_S00_AXI_BASEADDR
-
+volatile u8* motor_power_reg;
 
 /***************************** LCD define *********************************/
 
@@ -93,7 +102,7 @@ float roll_integral = 0.0;
 float pitch_integral = 0.0;
 
 
-/***************************** function declaration *********************************/
+/***************************** function prototype *********************************/
 
 void LCD_Data_4bit (u8 data);
 void LCD_EnablePin();
@@ -113,11 +122,12 @@ void MPU6050_Init(void);
 float calculateAccelRoll(int16_t accel_x, int16_t accel_y, int16_t accel_z);
 float calculateAccelPitch(int16_t accel_x, int16_t accel_y, int16_t accel_z);
 
-void calculat_Offset(int16_t accel_data[3], int16_t gyro_data[3], int samples);
+void calculate_Offset(int16_t accel_data[3], int16_t gyro_data[3], int samples);
 float complementaryFilter(float angle_accel, float angle_gyro, float alpha, float gyro_rate, float threshold);
+
 float PI_Control(float target_angle, float current_angle, float* integral, float Kp, float Ki, float dt);
 
-
+void timer_intr_handler(void *CallBackRef);
 
 
 
@@ -125,20 +135,35 @@ int main() {
 
     init_platform();
     print("Start!\n\r");
+
+    motor_power_reg = (volatile u8*) BLDC_MOTOR_BASEADDR;
+    timer_intr_reg = (volatile unsigned int*) TIMER_INTR_BASEADDR;
+
+    timer_intr_reg[0] = 1;
+
     XIic_Initialize(&iic_instance, IIC_ID);
     MPU6050_Init();
 
-    LCD_Init();
-    LCD_WriteString("A: ");
-    LCD_GotoXY(1, 0);
-    LCD_WriteString("G: ");
+
+
+//    LCD_Init();
+//    LCD_WriteString("A: ");
+//    LCD_GotoXY(1, 0);
+//    LCD_WriteString("G: ");
 
     calculate_Offset(accel_data, gyro_data, 500);	//when the device start, it averages 500
 
-    volatile unsigned int* motor_power = (volatile unsigned int*) BLDC_MOTOR_BASEADDR;
+	// Interrupt init
+	XIntc_Initialize(&intc_instance, INTC_ID);
+    XIntc_Connect(&intc_instance, TIMER_INTR_VEC_ID, (XInterruptHandler) timer_intr_handler, (void *) NULL);
+    XIntc_Enable(&intc_instance, TIMER_INTR_VEC_ID);
+    XIntc_Start(&intc_instance, XIN_REAL_MODE);
 
+    Xil_ExceptionInit();
+    Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT, (Xil_ExceptionHandler) XIntc_InterruptHandler, (void *) &intc_instance);
+    Xil_ExceptionEnable();
 
-    while(1) {
+    timer_intr_reg[0] = 0;
 
     	/********** JH code  ***********/
 
@@ -179,6 +204,15 @@ int main() {
 
        MB_Sleep(100);
 
+    // motor middle value
+    motor_power_reg[0] = 0xf;
+    motor_power_reg[1] = 0xf;
+    motor_power_reg[2] = 0xf;
+    motor_power_reg[3] = 0xf;
+
+
+    while(1)
+    {
 
 /*
 	       ////////////////- lcd data output -/////////////////
@@ -377,75 +411,146 @@ void MPU6050_Init(void) {
 
 /***************************** LCD function ********************************/
 
-void LCD_Data_4bit (u8 data)
-{
-	I2C_LCD_Data = (I2C_LCD_Data & 0x0f) | (data & 0xf0);		// put upper four bits
-	LCD_EnablePin();
-	I2C_LCD_Data = (I2C_LCD_Data & 0x0f) | ((data & 0x0f)<<4);	// put lower four bits
-	LCD_EnablePin();
+//void LCD_Data_4bit (u8 data)
+//{
+//	I2C_LCD_Data = (I2C_LCD_Data & 0x0f) | (data & 0xf0);		// put upper four bits
+//	LCD_EnablePin();
+//	I2C_LCD_Data = (I2C_LCD_Data & 0x0f) | ((data & 0x0f)<<4);	// put lower four bits
+//	LCD_EnablePin();
+//
+//}
+//
+//void LCD_EnablePin()
+//{
+//	I2C_LCD_Data &= ~(1<<LCD_E);
+//	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
+//	I2C_LCD_Data |= (1<<LCD_E);
+//	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
+//	I2C_LCD_Data &= ~(1<<LCD_E);
+//	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
+//	MB_Sleep(2);
+//}
+//
+//void LCD_WriteCommand(uint8_t commandData)
+//{
+//	I2C_LCD_Data &= ~(1<<LCD_RS);					// enter instruction code mode
+//	I2C_LCD_Data &= ~(1<<LCD_RW);					// enter write mode
+//	LCD_Data_4bit(commandData);						// output data
+//}
+//void LCD_WriteData(uint8_t charData)
+//{
+//	I2C_LCD_Data |= (1<<LCD_RS);						// enter data mode
+//	I2C_LCD_Data &= ~(1<<LCD_RW);						// enter write mode
+//	LCD_Data_4bit(charData);						// output data
+//}
+//void LCD_Init()
+//{
+//	// see HD44780 datasheet page 45 for following init commands
+//	MB_Sleep(20);
+//	LCD_WriteCommand(0x03);
+//	MB_Sleep(5);
+//	LCD_WriteCommand(0x03);
+//	MB_Sleep(1);
+//	LCD_WriteCommand(0x03);
+//
+//	LCD_WriteCommand(0x02);
+//	LCD_WriteCommand(COMMAND_4BIT_MODE);
+//	LCD_WriteCommand(COMMAND_DISPLAY_OFF);
+//	LCD_WriteCommand(COMMAND_DISPLAY_CLEAR);
+//	LCD_WriteCommand(COMMAND_ENTRY_MODE);
+//	LCD_WriteCommand(COMMAND_DISPLAY_ON);
+//	LCD_BackLightOn();
+//}
+//void LCD_BackLightOn()
+//{
+//	I2C_LCD_Data |= (1<<LCD_BACKLIGHT);
+//
+//}
+//
+//void LCD_GotoXY(uint8_t row, uint8_t col)
+//{
+//	col %= 16;										// column width is within 16
+//	row %= 2;										// row length is within 2
+//	uint8_t address = (0x40 * row) + col;			// see HD44780 datasheet page 12
+//	uint8_t command = 0x80 + address;
+//	LCD_WriteCommand(command);
+//}
+//
+//void LCD_WriteString(char *string)
+//{
+//	for (uint8_t i = 0; string[i]; i++)
+//	{
+//		LCD_WriteData(string[i]);
+//	}
+//}
 
-}
+void timer_intr_handler(void *CallBackRef)
+{
+	static float integral_roll, integral_pitch;
+	static int count = 0;
+	count++;
 
-void LCD_EnablePin()
-{
-	I2C_LCD_Data &= ~(1<<LCD_E);
-	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
-	I2C_LCD_Data |= (1<<LCD_E);
-	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
-	I2C_LCD_Data &= ~(1<<LCD_E);
-	XIic_Send(iic_instance.BaseAddress, 0x27, &I2C_LCD_Data, 1, XIIC_STOP);
-	MB_Sleep(2);
-}
-
-void LCD_WriteCommand(uint8_t commandData)
-{
-	I2C_LCD_Data &= ~(1<<LCD_RS);					// enter instruction code mode
-	I2C_LCD_Data &= ~(1<<LCD_RW);					// enter write mode
-	LCD_Data_4bit(commandData);						// output data
-}
-void LCD_WriteData(uint8_t charData)
-{
-	I2C_LCD_Data |= (1<<LCD_RS);						// enter data mode
-	I2C_LCD_Data &= ~(1<<LCD_RW);						// enter write mode
-	LCD_Data_4bit(charData);						// output data
-}
-void LCD_Init()
-{
-	// see HD44780 datasheet page 45 for following init commands
-	MB_Sleep(20);
-	LCD_WriteCommand(0x03);
-	MB_Sleep(5);
-	LCD_WriteCommand(0x03);
-	MB_Sleep(1);
-	LCD_WriteCommand(0x03);
-
-	LCD_WriteCommand(0x02);
-	LCD_WriteCommand(COMMAND_4BIT_MODE);
-	LCD_WriteCommand(COMMAND_DISPLAY_OFF);
-	LCD_WriteCommand(COMMAND_DISPLAY_CLEAR);
-	LCD_WriteCommand(COMMAND_ENTRY_MODE);
-	LCD_WriteCommand(COMMAND_DISPLAY_ON);
-	LCD_BackLightOn();
-}
-void LCD_BackLightOn()
-{
-	I2C_LCD_Data |= (1<<LCD_BACKLIGHT);
-
-}
-
-void LCD_GotoXY(uint8_t row, uint8_t col)
-{
-	col %= 16;										// column width is within 16
-	row %= 2;										// row length is within 2
-	uint8_t address = (0x40 * row) + col;			// see HD44780 datasheet page 12
-	uint8_t command = 0x80 + address;
-	LCD_WriteCommand(command);
-}
-
-void LCD_WriteString(char *string)
-{
-	for (uint8_t i = 0; string[i]; i++)
+	if (count >= 100)
 	{
-		LCD_WriteData(string[i]);
+		count = 0;
+
+		/********** JH code  ***********/
+
+	   // read accel, gyro data
+	   MPU6050_ReadAccelGyro(accel_data, gyro_data);
+
+
+	   // offset
+//	   accel_data[0] -= accel_offset[0];
+//	   accel_data[1] -= accel_offset[1];
+//	   accel_data[2] -= accel_offset[2];
+//
+//	   gyro_data[0]	-= gyro_offset[0];
+//	   gyro_data[1]	-= gyro_offset[1];
+//	   gyro_data[2]	-= gyro_offset[2];
+
+
+	   // accel - Roll,Pitch
+	   roll_accel = calculateAccelRoll(accel_data[0], accel_data[1], accel_data[2]);
+	   pitch_accel = calculateAccelPitch(accel_data[0], accel_data[1], accel_data[2]);
+
+	   // gyro - Roll,Pitch
+//	   roll_gyro += (gyro_data[0]) / 131.0 * dt;
+//	   pitch_gyro += (gyro_data[1]) / 131.0 * dt;
+
+
+	   // Complementary Filter
+//	   roll_filtered = complementaryFilter(roll_accel, roll_gyro, alpha);
+//	   pitch_filtered = complementaryFilter(pitch_accel, pitch_gyro, alpha);
+	   roll_filtered = roll_accel;
+	   pitch_filtered = pitch_accel;
+
+	   //printf("Accel X: %d  Y: %d  Z: %d\n\r"  , accel_data[0]>>7, accel_data[1]>>7, accel_data[2]>>7);
+	   //printf("Gyro  X: %d  Y: %d  Z: %d\n"  , gyro_data[0]>>7,  gyro_data[1]>>7,  gyro_data[2]>>7);
+
+	   float error_roll, error_pitch;
+	   error_roll = PI_Control(0, roll_filtered, &integral_roll, 1.0, 0.0, 0.1);
+	   error_pitch = PI_Control(0, pitch_filtered, &integral_pitch, 1.0, 0.0, 0.1);
+
+	   printf("roll: %5.5f pitch: %5.5f\r\n", error_roll, error_pitch);
+
+	   /*
+	    * 0   1
+	    *   o
+	    * 2   3
+	    */
+
+	   u8 motor0, motor1, motor2, motor3;
+	   motor0 = (u8) ((float) motor_power_reg[0] + error_roll + error_pitch);
+	   motor1 = (u8) ((float) motor_power_reg[1] - error_roll + error_pitch);
+	   motor2 = (u8) ((float) motor_power_reg[2] + error_roll - error_pitch);
+	   motor3 = (u8) ((float) motor_power_reg[3] - error_roll - error_pitch);
+
+	   motor_power_reg[0] = motor0;
+	   motor_power_reg[1] = motor1;
+	   motor_power_reg[2] = motor2;
+	   motor_power_reg[3] = motor3;
 	}
+
+
 }
