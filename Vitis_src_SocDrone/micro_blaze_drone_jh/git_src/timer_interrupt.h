@@ -9,7 +9,7 @@
 volatile unsigned int *timer0_interrupt_reg;
 
 void myip_timerInterrupt_init();
-void myip_timerInterrupt_setInterval_us (volatile unsigned int * timer_reg, u32 interval_us);
+void myip_timerInterrupt_setInterval_us (volatile unsigned int * timer_reg, int interval_us);
 void myip_timerInterrupt_start (volatile unsigned int * timer_reg);
 void myip_timerInterrupt_stop (volatile unsigned int * timer_reg);
 

@@ -12,7 +12,7 @@ void myip_timerInterrupt_init()
  * Set interrupt interval
  * @param interval_us: desired interrupt interval in us
  */
-void myip_timerInterrupt_setInterval_us (volatile unsigned int * timer_reg, u32 interval_us)
+void myip_timerInterrupt_setInterval_us (volatile unsigned int * timer_reg, int interval_us)
 {
 	timer_reg[1] = interval_us * SYSCLK_TO_US;
 }
