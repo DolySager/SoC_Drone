@@ -11,13 +11,19 @@ XUartLite 	bluetooth_uart_instance;
 
 u8 rx_byte_buffer;
 u8 rx_buffer[20];
-u8 buffer_index = 0;
+u8 rx_buffer_index = 0;
 
 
 void usb_SendHandler(void *CallBackRef, unsigned int EventData);
 void usb_RecvHandler(void *CallBackRef, unsigned int EventData);
 void bluetooth_SendHandler(void *CallBackRef, unsigned int EventData);
 void bluetooth_RecvHandler(void *CallBackRef, unsigned int EventData);
-void uart_print(XUartLite *uart_instance, const u8 *str_ptr);
+void uart_print(XUartLite *uart_instance, const char *str_ptr);
+
+void process_command (const u8 *str_ptr);
+u8 * parse_command(u8 *input_buffer, u8 *output_buffer);
+u32 parse_integer(const u8 *str_ptr);
+float parse_float(const u8 *str_ptr);
+u8 is_str_equal (const u8 *str1_ptr, const char *str2_ptr);
 
 #endif
