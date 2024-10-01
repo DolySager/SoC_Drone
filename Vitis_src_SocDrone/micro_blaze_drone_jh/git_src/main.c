@@ -59,10 +59,12 @@ int main() {
 	XIntc_Initialize(&intc_instance, INTC_ID);
     XIntc_Connect(&intc_instance, TIMER_INTR_VEC_ID, (XInterruptHandler) timer_intr_handler, (void *) NULL);
     XIntc_Enable(&intc_instance, TIMER_INTR_VEC_ID);
+
     XIntc_Connect(&intc_instance, USB_UART_VEC_ID, (XInterruptHandler)XUartLite_InterruptHandler, (void *)&usb_uart_instance);
     XIntc_Enable(&intc_instance, USB_UART_VEC_ID);
     XIntc_Connect(&intc_instance, BLUETOOTH_UART_VEC_ID, (XInterruptHandler)XUartLite_InterruptHandler, (void *)&usb_uart_instance);
     XIntc_Enable(&intc_instance, BLUETOOTH_UART_VEC_ID);
+
     XIntc_Start(&intc_instance, XIN_REAL_MODE);
 
     Xil_ExceptionInit();
@@ -134,8 +136,8 @@ void timer_intr_handler(void *CallBackRef)
    pitch_filtered = pitch_accel;
 
    float error_roll, error_pitch;
-   error_roll = PI_Control(0, roll_filtered, &integral_roll, 0.5, 0.1, SAMPLING_PERIOD_S);
-   error_pitch = PI_Control(0, pitch_filtered, &integral_pitch, 0.5, 0.1, SAMPLING_PERIOD_S);
+   error_roll = PI_Control(0, roll_filtered, &integral_roll, 1.5, 0.01, SAMPLING_PERIOD_S);
+   error_pitch = PI_Control(0, pitch_filtered, &integral_pitch, 1.5, 0.01, SAMPLING_PERIOD_S);
 
 
 
