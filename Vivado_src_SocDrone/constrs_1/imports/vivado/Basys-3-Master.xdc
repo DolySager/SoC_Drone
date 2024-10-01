@@ -74,8 +74,8 @@ create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports clk
 ##Pmod Header JA
 set_property -dict { PACKAGE_PIN J1   IOSTANDARD LVCMOS33 } [get_ports {iic_rtl_scl_io}];#Sch name = JA1
 set_property -dict { PACKAGE_PIN L2   IOSTANDARD LVCMOS33 } [get_ports {iic_rtl_sda_io}];#Sch name = JA2
-set_property -dict { PACKAGE_PIN J2   IOSTANDARD LVCMOS33 } [get_ports {bluetooth_uart_rx}];#Sch name = JA3
-set_property -dict { PACKAGE_PIN G2   IOSTANDARD LVCMOS33 } [get_ports {bluetooth_uart_tx}];#Sch name = JA4
+#set_property -dict { PACKAGE_PIN J2   IOSTANDARD LVCMOS33 } [get_ports {}];#Sch name = JA3
+#set_property -dict { PACKAGE_PIN G2   IOSTANDARD LVCMOS33 } [get_ports {}];#Sch name = JA4
 #set_property -dict { PACKAGE_PIN H1   IOSTANDARD LVCMOS33 } [get_ports {iic_rtl_ado_io}];#Sch name = JA7
 #set_property -dict { PACKAGE_PIN K2   IOSTANDARD LVCMOS33 } [get_ports {iic_rtl_int_io}];#Sch name = JA8
 #set_property -dict { PACKAGE_PIN H2   IOSTANDARD LVCMOS33 } [get_ports {JA[6]}];#Sch name = JA9
@@ -92,8 +92,8 @@ set_property -dict { PACKAGE_PIN B16   IOSTANDARD LVCMOS33 } [get_ports {pwm_0[3
 #set_property -dict { PACKAGE_PIN C16   IOSTANDARD LVCMOS33 PULLDOWN TRUE} [get_ports {row[3]}];#Sch name = JB10
 
 ##Pmod Header JC
-#set_property -dict { PACKAGE_PIN K17   IOSTANDARD LVCMOS33 } [get_ports {scl}];#Sch name = JC1
-#set_property -dict { PACKAGE_PIN M18   IOSTANDARD LVCMOS33 } [get_ports {sda}];#Sch name = JC2
+set_property -dict { PACKAGE_PIN K17   IOSTANDARD LVCMOS33 } [get_ports {bluetooth_uart_rx}];#Sch name = JC1
+set_property -dict { PACKAGE_PIN M18   IOSTANDARD LVCMOS33 } [get_ports {bluetooth_uart_tx}];#Sch name = JC2
 #set_property -dict { PACKAGE_PIN N17   IOSTANDARD LVCMOS33 } [get_ports {row[2]}];#Sch name = JC3
 #set_property -dict { PACKAGE_PIN P18   IOSTANDARD LVCMOS33 } [get_ports {row[3]}];#Sch name = JC4
 #set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 } [get_ports {row[4]}];#Sch name = JC7
