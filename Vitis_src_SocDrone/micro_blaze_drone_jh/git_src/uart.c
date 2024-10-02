@@ -181,3 +181,116 @@ u8 is_str_equal (const u8 *str1_ptr, const char *str2_ptr)
 
 	return result;
 }
+
+/*
+ * Print integer to uart
+ * 
+ * fill output buffer starting with least significant digit
+ * at the end of print_buffer except last bit, which is NULL character
+ * and then use the first actual number character in the buffer.
+ * 
+ * EX: int_input is 5142
+ * print_buffer is x x x ... x x 5 1 4 2 \0
+ *                               ^ print_buffer_handle indicates here at the end
+ *
+ * NOTE 1: operator '--' precedes operator '*'.
+ * NOTE 2: increment/decrement postfix (ex: var++) uses the original variable value
+ *			first, and then increment/decrement its value.
+ *
+ */
+void print_integer (XUartLite *uart_inst_ptr, u32 int_input)
+{
+	u8 print_buffer[PARSE_BUFFER_SIZE];
+	print_buffer[PARSE_BUFFER_SIZE-1] = 0;		// add NULL character at the end
+	u8 *print_buffer_handle = print_buffer + (PARSE_BUFFER_SIZE-2);	// start filling buffer from the end, except NULL at the very end
+	u32 ten_powers = 10;
+	while (int_input)
+	{
+		*print_buffer_handle-- = (int_input % ten_powers) + '0';	// read NOTE above for explanation
+		int_input /= ten_powers;
+		ten_powers *= 10;
+		if (print_buffer_handle == print_buffer) break;		// if the buffer is about to overflow, stop parsing and print
+	}
+	uart_print(uart_inst_ptr, print_buffer_handle);
+}
+
+
+/*
+ * Print float to uart
+ *
+ * First, shift decimal point to the left until the float is less than 1. 
+ *		Record number of shifts
+ * Second, shift decimal point to the right one by one, and put the ones into buffer.
+ *		The digit that was put to the buffer will be substracted to be removed.
+ *		When this was repeated recorded number of decimal point shifts, add decimal point to print buffer.
+ * 		Iteration stops when the float is zeroed out.
+ *
+ * NOTE: integer digits are fixed, and can be used with for loop, but
+ *			decimal digits are not fixed since it potentially
+ *
+ *
+ * Example:
+ *		Suppose float of 314.9523 is to be printed:
+ *
+ *	At the end of first step:
+ *		the float = 0.3149523 / num_shift = 3
+ *
+ *	Second step iteration 1:
+ *		the float = 3.149523 -> 0.149523
+ *		print_buffer 3 x x x x x x x x ...
+ *
+ *	Second step iteration 2:
+ *		the float = 1.49523 -> 0.49523
+ *		print_buffer 3 1 x x x x x x x ...
+ *
+ *	Second step iteration 3 (decimal point added):
+ *		the float = 4.9523 -> 0.9523
+ *		print_buffer 3 1 4 . x x x x x ...
+ *
+ *	Second step iteration 4:
+ *		the float = 9.523 -> 0.523
+ *		print_buffer 3 1 4 . 9 x x x x ...
+ *
+ *	...rest iteration skipped...
+ *
+ *	Second step iteration 7 (last):
+ *		the float = 3 -> 0 (end condition)
+ *		print_buffer 3 1 4 . 9 5 2 3 x ...
+ *
+ *
+ */
+void print_float (XUartLite *uart_inst_ptr, float float_input)
+{
+	// get num digits of integer part 
+	u32 num_shift = 0;
+	while (float_input > 1.0)
+	{
+		float_input /= 10.0;
+		++num_shift;
+	}
+
+	// put the float to the buffer
+	u8 print_buffer[PARSE_BUFFER_SIZE];
+	u8 *print_buffer_handle = print_buffer;	// assign handle to the start of the buffer
+	u32 index = 0;	// to determine decimal point insertion index
+	while (float_input)
+	{
+		if (index != num_shift) 
+		{
+			float_input *= 10.0
+			u8 float_input_integer_part = (u8) float_input;		// only one digit of integer part at a time
+			*print_buffer_handle++ = float_input_integer_part + '0';	// truncate the float to ones digit
+			float_input -= (float) float_input_integer_part;	// remove the digit that was put to the buffer
+		}
+		else /* index == num_shift */
+		{
+			if (!num_shift) *print_buffer_handle++ = '0';	// if there is no integer part, add zero
+			*print_buffer_handle++ = '.';
+		}
+		++index;	// unnecessary increment operation does exist
+		if (print_buffer_handle == print_buffer+(PARSE_BUFFER_SIZE-1)) break; // if the buffer is about to overflow, stop parsing and print
+	}
+	print_buffer_handle = '\0';	// put NULL character at the end
+
+	uart_print(uart_inst_ptr, print_buffer);
+}

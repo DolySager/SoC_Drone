@@ -32,5 +32,7 @@ u8 * parse_command(u8 *input_buffer, u8 *output_buffer);
 u32 parse_integer(const u8 *str_ptr);
 float parse_float(const u8 *str_ptr);
 u8 is_str_equal (const u8 *str1_ptr, const char *str2_ptr);
+void print_integer (XUartLite *uart_inst_ptr, u32 int_input);
+void print_float (XUartLite *uart_inst_ptr, float float_input);
 
 #endif
