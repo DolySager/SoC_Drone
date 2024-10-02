@@ -11,20 +11,19 @@ float pitch_filtered = 0;
 
 // gyro - 98% , accel - 2%
 float alpha = 0.98;
-float dt = 0.01;
 
-u16 accel_sum[3] = {0,};
-u16 gyro_sum[3]  = {0,};
+s16 accel_sum[3] = {0,};
+s16 gyro_sum[3]  = {0,};
 
-u16 accel_offset[3] = {0,};
-u16 gyro_offset[3]	= {0,};
+s16 accel_offset[3] = {0,};
+s16 gyro_offset[3]	= {0,};
 
-u16 accel_data[3], gyro_data[3];
+s16 accel_data[3], gyro_data[3];
 
 // gyro offset correction
-u16 gyro_offset_x = 0;
-u16 gyro_offset_y = 0;
-u16 gyro_offset_z = 0;
+s16 gyro_offset_x = 0;
+s16 gyro_offset_y = 0;
+s16 gyro_offset_z = 0;
 
 float gyro_rate;
 float threshold = 0.1;
@@ -41,7 +40,7 @@ void MPU6050_Read(u8 reg, u8 *buffer, u16 len) {
     XIic_Recv(iic_instance.BaseAddress, MPU6050_ADDR, buffer, 14, XIIC_STOP);
 }
 
-void MPU6050_ReadAccelGyro(u16 *accel_data, u16 *gyro_data) {
+void MPU6050_ReadAccelGyro(s16 *accel_data, s16 *gyro_data) {
     u8 buffer[14];
 
     MPU6050_Read(0x3B, buffer, 14);
@@ -60,13 +59,13 @@ void MPU6050_Init(void) {
 }
 
 
-float calculateAccelRoll(u16 accel_x, u16 accel_y, u16 accel_z)
+float calculateAccelRoll(s16 accel_x, s16 accel_y, s16 accel_z)
 {
     return atan2f(accel_y, sqrtf(accel_x * accel_x + accel_z * accel_z)) * (180 / M_PI);
 }
 
 
-float calculateAccelPitch(u16 accel_x, u16 accel_y, u16 accel_z)
+float calculateAccelPitch(s16 accel_x, s16 accel_y, s16 accel_z)
 {
     return atan2f(accel_x, sqrtf(accel_y * accel_y + accel_z * accel_z)) * -(180 / M_PI);
 }
@@ -74,7 +73,7 @@ float calculateAccelPitch(u16 accel_x, u16 accel_y, u16 accel_z)
 
 
 
-void calculate_Offset(u16 accel_data[3], u16 gyro_data[3], int samples)
+void calculate_Offset(s16 accel_data[3], s16 gyro_data[3], int samples)
 {
     for (int i = 0; i < samples; i++)
     {

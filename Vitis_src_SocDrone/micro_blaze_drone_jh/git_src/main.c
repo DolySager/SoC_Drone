@@ -37,7 +37,10 @@ volatile unsigned int* timer_intr_reg;
 XIic iic_instance;
 
 #define BLDC_MOTOR_BASEADDR 	XPAR_MYIP_DRONE_BLDC_MOTO_0_S00_AXI_BASEADDR
-volatile s16* motor_power_reg;
+volatile s32* motor_power_reg;
+
+extern s16 accel_data[3], gyro_data[3];
+extern s16 accel_offset[3], gyro_offset[3];
 
 void timer_intr_handler(void *CallBackRef);
 
@@ -48,7 +51,7 @@ int main() {
     myip_timerInterrupt_init();
     print("Start!\n\r");
 
-    motor_power_reg = (volatile s16*) BLDC_MOTOR_BASEADDR;
+    motor_power_reg = (volatile s32*) BLDC_MOTOR_BASEADDR;
 
     XUartLite_Initialize(&usb_uart_instance, USB_UART_ID);
     XUartLite_Initialize(&bluetooth_uart_instance, BLUETOOTH_UART_ID);
@@ -78,21 +81,25 @@ int main() {
     XUartLite_SetSendHandler(&bluetooth_uart_instance, bluetooth_SendHandler, &bluetooth_uart_instance);
     XUartLite_EnableInterrupt(&bluetooth_uart_instance);
 
+    uart_print(&bluetooth_uart_instance, "Drone initializing, please wait...\n\r");
+
     // motor middle value
     motor_power_reg[0] = 0;
     motor_power_reg[1] = 0;
     motor_power_reg[2] = 0;
     motor_power_reg[3] = 0;
 
-//    myip_timerInterrupt_setInterval_us (timer0_interrupt_reg, SAMPLING_PERIOD_S * 1000000);
-//    myip_timerInterrupt_start (timer0_interrupt_reg);
-
-//    MPU6050_Init();
+    MPU6050_Init();
 // 	calculate_Offset(accel_data, gyro_data, 500);	//when the device start, it averages 500
 
+    MB_Sleep(3000);	// for motor to startup
+
+    myip_timerInterrupt_setInterval_us (timer0_interrupt_reg, SAMPLING_PERIOD_S * 1000000);
+    myip_timerInterrupt_start (timer0_interrupt_reg);
 
     // Start receiving bluetooth byte
     XUartLite_Recv(&bluetooth_uart_instance, &rx_byte_buffer, 1);
+    uart_print(&bluetooth_uart_instance, "Drone Ready, input command...\n\r");
 
     while(1)
     {
@@ -106,10 +113,9 @@ int main() {
 
 void timer_intr_handler(void *CallBackRef)
 {
-/*
 	static float integral_roll, integral_pitch;
 
-	******** JH code  *********
+	/******** JH code  *********/
 
    // read accel, gyro data
    MPU6050_ReadAccelGyro(accel_data, gyro_data);
@@ -141,19 +147,20 @@ void timer_intr_handler(void *CallBackRef)
    pitch_filtered = pitch_accel;
 
    float error_roll, error_pitch;
-   error_roll = PI_Control(0, roll_filtered, &integral_roll, 1.5, 0.01, SAMPLING_PERIOD_S);
-   error_pitch = PI_Control(0, pitch_filtered, &integral_pitch, 1.5, 0.01, SAMPLING_PERIOD_S);
+   error_roll = PID_Control(0, roll_filtered, &integral_roll, Kp_roll, Ki_roll, Kd_roll, SAMPLING_PERIOD_S);
+   error_pitch = PID_Control(0, pitch_filtered, &integral_pitch, Kp_pitch, Ki_pitch, Kd_pitch, SAMPLING_PERIOD_S);
 
 
 
-
+   /*		-pitch
 	* 		 0   1
-	* sensor x
-	* 		 2   3
+	* +roll	 	 x motion_sensor	-roll
+	* 		 3   2
+	* 		 +pitch
+	*/
 
-
-   motor_power_reg[0] = (s16) ((float) motor_power_reg[0] + error_roll + error_pitch);
-   motor_power_reg[1] = (s16) ((float) motor_power_reg[1] - error_roll + error_pitch);
+   motor_power_reg[0] = (s16) ((float) motor_power_reg[0] - error_roll + error_pitch);
+   motor_power_reg[1] = (s16) ((float) motor_power_reg[1] + error_roll + error_pitch);
    motor_power_reg[2] = (s16) ((float) motor_power_reg[2] + error_roll - error_pitch);
    motor_power_reg[3] = (s16) ((float) motor_power_reg[3] - error_roll - error_pitch);
 
@@ -164,7 +171,5 @@ void timer_intr_handler(void *CallBackRef)
 
    }
 
-   //printf("%03.3f %03.3f / %03.3f %03.3f / %3d %3d %3d %3d\n\r", roll_filtered, pitch_filtered, error_roll, error_pitch, motor_power_reg[0], motor_power_reg[1], motor_power_reg[2], motor_power_reg[3]);
-
-   */
+   printf("%03.3f %03.3f / %03.3f %03.3f / %3d %3d %3d %3d\n\r", roll_filtered, pitch_filtered, error_roll, error_pitch, motor_power_reg[0], motor_power_reg[1], motor_power_reg[2], motor_power_reg[3]);
 }
