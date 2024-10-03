@@ -1,3 +1,20 @@
+/*
+ * Drone Overview
+ *
+ *		-pitch
+ * 		 0   1
+ * +roll	 x sensor	-roll
+ * 		 3   2
+ * 		 +pitch
+ *
+ *			min duty	direction
+ * Motor 0:	38			CCW
+ * Motor 1:	39			CW
+ * Motor 2:	33			CCW
+ * Motor 3:	13			CW
+ */
+
+
 // standard include
 #include <stdio.h>
 
