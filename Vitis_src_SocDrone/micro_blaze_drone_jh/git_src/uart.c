@@ -53,13 +53,24 @@ void process_command (const u8 *str_ptr)
 	if (is_str_equal(parse_buffer, "off"))
 	{
 		// Turn on PID mode
-		is_motor_off = 1;
-		uart_print(&bluetooth_uart_instance, "Motor off\n\r");
+		motor_mode_var = MOTOR_OFF;
+		uart_print(&bluetooth_uart_instance, "Motor off\n");
 	}
-	else if (is_str_equal(parse_buffer, "on"))
+	else if (is_str_equal(parse_buffer, "manual"))
 	{
 		// Set motor power manually
-		is_motor_off = 0;
+		u32 input_integer = parse_integer(str_ptr);
+		motor_power_manual = (u8) input_integer;
+		motor_mode_var = MOTOR_MANUAL;
+		uart_print(&bluetooth_uart_instance, "Motor power set to: ");
+		print_integer(&bluetooth_uart_instance, input_integer);
+		uart_print(&bluetooth_uart_instance, "\n");
+	}
+	else if (is_str_equal(parse_buffer, "pid"))
+	{
+		// Set motor power manually
+		motor_mode_var = MOTOR_PID;
+		uart_print(&bluetooth_uart_instance, "Motor PID mode\n");
 	}
 	else if (is_str_equal(parse_buffer, "set"))
 	{
@@ -70,23 +81,23 @@ void process_command (const u8 *str_ptr)
 		{
 			Kp_roll = input_float;
 			Kp_pitch = input_float;
-			uart_print(&bluetooth_uart_instance, "OK: Kp changed\n\r");
+			uart_print(&bluetooth_uart_instance, "OK: Kp changed\n");
 		}
 		else if (is_str_equal(parse_buffer, "ki"))
 		{
 			Ki_roll = input_float;
 			Ki_pitch = input_float;
-			uart_print(&bluetooth_uart_instance, "OK: Ki changed\n\r");
+			uart_print(&bluetooth_uart_instance, "OK: Ki changed\n");
 		}
 		else if (is_str_equal(parse_buffer, "kd"))
 		{
 			Kd_roll = input_float;
 			Kd_pitch = input_float;
-			uart_print(&bluetooth_uart_instance, "OK: Kd changed\n\r");
+			uart_print(&bluetooth_uart_instance, "OK: Kd changed\n");
 		}
 		else
 		{
-			uart_print(&bluetooth_uart_instance, "Error\n\r");
+			uart_print(&bluetooth_uart_instance, "Error\n");
 		}
 	}
 	else if (is_str_equal(parse_buffer, "show"))
@@ -99,17 +110,31 @@ void process_command (const u8 *str_ptr)
 		}
 		else
 		{
-			uart_print(&bluetooth_uart_instance, "Error\n\r");
+			uart_print(&bluetooth_uart_instance, "Error\n");
 		}
 	}
 	else if (is_str_equal(parse_buffer, "help"))
 	{
-		uart_print(&bluetooth_uart_instance, "Help to be implemented...\n\r");
+		uart_print(&bluetooth_uart_instance, "List of available commands:\n");
+		uart_print(&bluetooth_uart_instance, "off: turn off motor\n");
+		uart_print(&bluetooth_uart_instance, "manual <0..255>: set motor power\n");
+		uart_print(&bluetooth_uart_instance, "pid: set motor to pid mode\n");
+		uart_print(&bluetooth_uart_instance, "set (kp|ki|kd) <float>: set pid constant\n");
+		uart_print(&bluetooth_uart_instance, "help: display this message\n");
+	}
+	else if (is_str_equal(parse_buffer, "reset"))
+	{
+		internal_motor_power_float[0] = 0;
+		internal_motor_power_float[1] = 0;
+		internal_motor_power_float[2] = 0;
+		internal_motor_power_float[3] = 0;
+		uart_print(&bluetooth_uart_instance, "Motor power reset done\n");
 	}
 	else
 	{
-		uart_print(&bluetooth_uart_instance, "Error\n\r");
+		uart_print(&bluetooth_uart_instance, "Error\n");
 	}
+
 }
 
 // NOTE: *str_ptr++ is same as *(str_ptr++), not (*str_ptr)++
@@ -201,20 +226,19 @@ u8 is_str_equal (const u8 *str1_ptr, const char *str2_ptr)
 void print_integer (XUartLite *uart_inst_ptr, u32 int_input)
 {
 	u8 print_buffer[PARSE_BUFFER_SIZE];
-	print_buffer[PARSE_BUFFER_SIZE-1] = 0;		// add NULL character at the end
+	print_buffer[PARSE_BUFFER_SIZE-1] = '\0';		// add NULL character at the end
 	u8 *print_buffer_handle = print_buffer + (PARSE_BUFFER_SIZE-2);	// start filling buffer from the end, except NULL at the very end
-	u32 ten_powers = 10;
 	while (int_input)
 	{
-		*print_buffer_handle-- = (int_input % ten_powers) + '0';	// read NOTE above for explanation
-		int_input /= ten_powers;
-		ten_powers *= 10;
+		*print_buffer_handle-- = (int_input % 10) + '0';	// read NOTE above for explanation
+		int_input /= 10;
 		if (print_buffer_handle == print_buffer) break;		// if the buffer is about to overflow, stop parsing and print
 	}
-	uart_print(uart_inst_ptr, print_buffer_handle);
+	uart_print(uart_inst_ptr, ++print_buffer_handle);
 }
 
 
+// TODO: NOT TESTED YET
 /*
  * Print float to uart
  *
@@ -277,7 +301,7 @@ void print_float (XUartLite *uart_inst_ptr, float float_input)
 	{
 		if (index != num_shift) 
 		{
-			float_input *= 10.0
+			float_input *= 10.0;
 			u8 float_input_integer_part = (u8) float_input;		// only one digit of integer part at a time
 			*print_buffer_handle++ = float_input_integer_part + '0';	// truncate the float to ones digit
 			float_input -= (float) float_input_integer_part;	// remove the digit that was put to the buffer

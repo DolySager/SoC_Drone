@@ -16,7 +16,17 @@ u8 rx_buffer[RX_BUFFER_SIZE];
 u8 rx_buffer_index;
 u8 is_uart_receiving;
 
-u8 is_motor_off;
+extern float internal_motor_power_float[4];
+
+typedef enum
+{
+	MOTOR_OFF,
+	MOTOR_MANUAL,
+	MOTOR_PID
+} Motor_Mode;
+
+Motor_Mode motor_mode_var;
+u8 motor_power_manual;
 
 extern float Kp_roll, Ki_roll, Kd_roll;
 extern float Kp_pitch, Ki_pitch, Kd_pitch;

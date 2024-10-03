@@ -42,6 +42,8 @@ volatile s32* motor_power_reg;
 extern s16 accel_data[3], gyro_data[3];
 extern s16 accel_offset[3], gyro_offset[3];
 
+float internal_motor_power_float[4] = {0, };
+
 void timer_intr_handler(void *CallBackRef);
 
 
@@ -49,7 +51,7 @@ int main() {
 
     init_platform();
     myip_timerInterrupt_init();
-    print("Start!\n\r");
+    print("Start!\n");
 
     motor_power_reg = (volatile s32*) BLDC_MOTOR_BASEADDR;
 
@@ -81,7 +83,7 @@ int main() {
     XUartLite_SetSendHandler(&bluetooth_uart_instance, bluetooth_SendHandler, &bluetooth_uart_instance);
     XUartLite_EnableInterrupt(&bluetooth_uart_instance);
 
-    uart_print(&bluetooth_uart_instance, "Drone initializing, please wait...\n\r");
+    uart_print(&bluetooth_uart_instance, "\n\nDrone (Rev. A) initializing, please wait...\n");
 
     // motor middle value
     motor_power_reg[0] = 0;
@@ -99,7 +101,7 @@ int main() {
 
     // Start receiving bluetooth byte
     XUartLite_Recv(&bluetooth_uart_instance, &rx_byte_buffer, 1);
-    uart_print(&bluetooth_uart_instance, "Drone Ready, input command...\n\r");
+    uart_print(&bluetooth_uart_instance, "Drone Ready. \"help\" for more command.\n\n");
 
     while(1)
     {
@@ -115,61 +117,74 @@ void timer_intr_handler(void *CallBackRef)
 {
 	static float integral_roll, integral_pitch;
 
-	/******** JH code  *********/
-
-   // read accel, gyro data
-   MPU6050_ReadAccelGyro(accel_data, gyro_data);
 
 
-   // offset
-//	   accel_data[0] -= accel_offset[0];
-//	   accel_data[1] -= accel_offset[1];
-//	   accel_data[2] -= accel_offset[2];
-//
-//	   gyro_data[0]	-= gyro_offset[0];
-//	   gyro_data[1]	-= gyro_offset[1];
-//	   gyro_data[2]	-= gyro_offset[2];
+	if (motor_mode_var == MOTOR_OFF)
+	{
+		motor_power_reg[0] = 0;
+		motor_power_reg[1] = 0;
+		motor_power_reg[2] = 0;
+		motor_power_reg[3] = 0;
+	}
+	else if (motor_mode_var == MOTOR_MANUAL)
+	{
+		motor_power_reg[0] = motor_power_manual;
+		motor_power_reg[1] = motor_power_manual;
+		motor_power_reg[2] = motor_power_manual;
+		motor_power_reg[3] = motor_power_manual;
+	}
+	else if (motor_mode_var == MOTOR_PID)
+	{
+		/******** JH code  *********/
+
+	   // read accel, gyro data
+	   MPU6050_ReadAccelGyro(accel_data, gyro_data);
+
+	   // accel - Roll,Pitch
+	   roll_accel = calculateAccelRoll(accel_data[0], accel_data[1], accel_data[2]);
+	   pitch_accel = calculateAccelPitch(accel_data[0], accel_data[1], accel_data[2]);
+
+	   // gyro - Roll,Pitch
+	//	   roll_gyro += (gyro_data[0]) / 131.0 * dt;
+	//	   pitch_gyro += (gyro_data[1]) / 131.0 * dt;
 
 
-   // accel - Roll,Pitch
-   roll_accel = calculateAccelRoll(accel_data[0], accel_data[1], accel_data[2]);
-   pitch_accel = calculateAccelPitch(accel_data[0], accel_data[1], accel_data[2]);
+	   // Complementary Filter
+	//	   roll_filtered = complementaryFilter(roll_accel, roll_gyro, alpha);
+	//	   pitch_filtered = complementaryFilter(pitch_accel, pitch_gyro, alpha);
+	   roll_filtered = roll_accel;
+	   pitch_filtered = pitch_accel;
 
-   // gyro - Roll,Pitch
-//	   roll_gyro += (gyro_data[0]) / 131.0 * dt;
-//	   pitch_gyro += (gyro_data[1]) / 131.0 * dt;
+	   float error_roll, error_pitch;
+	   error_roll = PID_Control(0, roll_filtered, &integral_roll, Kp_roll, Ki_roll, Kd_roll, SAMPLING_PERIOD_S);
+	   error_pitch = PID_Control(0, pitch_filtered, &integral_pitch, Kp_pitch, Ki_pitch, Kd_pitch, SAMPLING_PERIOD_S);
+
+	   /*		-pitch
+		* 		 0   1
+		* +roll	 	 x motion_sensor	-roll
+		* 		 3   2
+		* 		 +pitch
+		*/
+
+	   internal_motor_power_float[0] = 0 - error_roll + error_pitch;
+	   internal_motor_power_float[1] = 0 + error_roll + error_pitch;
+	   internal_motor_power_float[2] = 0 + error_roll - error_pitch;
+	   internal_motor_power_float[3] = 0 - error_roll - error_pitch;
+
+	   for (u8 i=0; i<4; i++)
+	   {
+		   if (internal_motor_power_float[i] > 255.0) internal_motor_power_float[i] = 255.0;
+		   else if (internal_motor_power_float[i] < 0.0) internal_motor_power_float[i] = 0.0;
+	   }
+
+	   motor_power_reg[0] = (s32) internal_motor_power_float[0];
+	   motor_power_reg[1] = (s32) internal_motor_power_float[1];
+	   motor_power_reg[2] = (s32) internal_motor_power_float[2];
+	   motor_power_reg[3] = (s32) internal_motor_power_float[3];
+
+	   // printf("%03.3f %03.3f / %03.3f %03.3f / %3d %3d %3d %3d\n", roll_filtered, pitch_filtered, error_roll, error_pitch, motor_power_reg[0], motor_power_reg[1], motor_power_reg[2], motor_power_reg[3]);
+	}
 
 
-   // Complementary Filter
-//	   roll_filtered = complementaryFilter(roll_accel, roll_gyro, alpha);
-//	   pitch_filtered = complementaryFilter(pitch_accel, pitch_gyro, alpha);
-   roll_filtered = roll_accel;
-   pitch_filtered = pitch_accel;
 
-   float error_roll, error_pitch;
-   error_roll = PID_Control(0, roll_filtered, &integral_roll, Kp_roll, Ki_roll, Kd_roll, SAMPLING_PERIOD_S);
-   error_pitch = PID_Control(0, pitch_filtered, &integral_pitch, Kp_pitch, Ki_pitch, Kd_pitch, SAMPLING_PERIOD_S);
-
-
-
-   /*		-pitch
-	* 		 0   1
-	* +roll	 	 x motion_sensor	-roll
-	* 		 3   2
-	* 		 +pitch
-	*/
-
-   motor_power_reg[0] = (s16) ((float) motor_power_reg[0] - error_roll + error_pitch);
-   motor_power_reg[1] = (s16) ((float) motor_power_reg[1] + error_roll + error_pitch);
-   motor_power_reg[2] = (s16) ((float) motor_power_reg[2] + error_roll - error_pitch);
-   motor_power_reg[3] = (s16) ((float) motor_power_reg[3] - error_roll - error_pitch);
-
-   for (u8 i=0; i<4; i++)
-   {
-	   if (motor_power_reg[i] > 255) motor_power_reg[i] = 255;
-	   else if (motor_power_reg[i] < 0) motor_power_reg[i] = 0;
-
-   }
-
-   printf("%03.3f %03.3f / %03.3f %03.3f / %3d %3d %3d %3d\n\r", roll_filtered, pitch_filtered, error_roll, error_pitch, motor_power_reg[0], motor_power_reg[1], motor_power_reg[2], motor_power_reg[3]);
 }

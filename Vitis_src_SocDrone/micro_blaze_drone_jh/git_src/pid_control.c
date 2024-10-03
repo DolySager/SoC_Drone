@@ -26,7 +26,7 @@ float PID_Control(float target_angle, float current_angle, float* integral, floa
 
     *integral += error * dt;
 
-    float output = (Kp * error) + (Ki * (*integral)) + (Kd * angle_diff / dt);
+    float output = (Kp * error) + (Ki * (*integral)) - (Kd * angle_diff / dt);
 
     return output;
 }
