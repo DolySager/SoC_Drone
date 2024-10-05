@@ -1,5 +1,5 @@
-#ifndef __MOTION_SENSOR_H_
-#define __MOTION_SENSOR_H_
+#ifndef __I2C_MOTION_SENSOR_H_
+#define __I2C_MOTION_SENSOR_H_
 
 #include "xil_types.h"
 #include "math.h"
@@ -26,20 +26,12 @@ s16 gyro_offset_x, gyro_offset_y, gyro_offset_z;
 
 float gyro_rate, threshold;
 
+#define IIC_ID 					XPAR_IIC_0_DEVICE_ID
+#define IIC_BASEADDR			XPAR_IIC_0_BASEADDR
 
-/*
-#define Calibration_Accel_X  2
-#define Calibration_Accel_Y  1
-#define Calibration_Accel_Z  166
-
-#define Calibration_Gyro_X  0
-#define Calibration_Gyro_Y  0
-#define Calibration_Gyro_Z  2
-*/
+XIic iic_instance;
 
 
-
-/***************************** MPU 6050 function ********************************/
 void MPU6050_Write(u8 reg, u8 data);
 void MPU6050_Read(u8 reg, u8 *buffer, u16 len);
 void MPU6050_ReadAccelGyro(s16 *accel_data, s16 *gyro_data);

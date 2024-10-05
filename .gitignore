@@ -20,3 +20,6 @@ IDE.log
 **/drivers/
 *.bit
 *.mmi
+
+# VSCode related
+**/.vscode/

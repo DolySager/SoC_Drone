@@ -1,32 +1,7 @@
-#include "motion_sensor.h"
+#include "i2c_motion_sensor.h"
 
-float roll_gyro = 0;
-float pitch_gyro = 0;
-
-float roll_accel = 0;
-float pitch_accel = 0;
-
-float roll_filtered = 0;
-float pitch_filtered = 0;
-
-// gyro - 98% , accel - 2%
-float alpha = 0.98;
-
-s16 accel_sum[3] = {0,};
-s16 gyro_sum[3]  = {0,};
-
-s16 accel_offset[3] = {0,};
-s16 gyro_offset[3]	= {0,};
-
-s16 accel_data[3], gyro_data[3];
-
-// gyro offset correction
-s16 gyro_offset_x = 0;
-s16 gyro_offset_y = 0;
-s16 gyro_offset_z = 0;
-
-float gyro_rate;
-float threshold = 0.1;
+float alpha = 0.98;     // gyro - 98% , accel - 2%
+float threshold = 0.1;  // gyro offset correction
 
 
 void MPU6050_Write(u8 reg, u8 data) {

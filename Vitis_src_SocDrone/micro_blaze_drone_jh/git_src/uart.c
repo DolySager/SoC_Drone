@@ -9,17 +9,17 @@ static u8 parse_buffer[PARSE_BUFFER_SIZE];
 
 void usb_SendHandler(void *CallBackRef, unsigned int EventData)
 {
-
+	// Intentially left blank
 }
 
 void usb_RecvHandler(void *CallBackRef, unsigned int EventData)
 {
-
+	// Intentially left blank
 }
 
 void bluetooth_SendHandler(void *CallBackRef, unsigned int ByteCount)
 {
-	while (XUartLite_IsSending(&bluetooth_uart_instance));
+	while (XUartLite_IsSending(&bluetooth_uart_instance));		// TODO: seems not affecting anything
 }
 
 void bluetooth_RecvHandler(void *CallBackRef, unsigned int ByteCount)
@@ -52,7 +52,7 @@ void process_command (const u8 *str_ptr)
 
 	if (is_str_equal(parse_buffer, "off"))
 	{
-		// Turn on PID mode
+		// Turn off motor
 		motor_mode_var = MOTOR_OFF;
 		uart_print(&bluetooth_uart_instance, "Motor off\n");
 	}
@@ -68,7 +68,7 @@ void process_command (const u8 *str_ptr)
 	}
 	else if (is_str_equal(parse_buffer, "pid"))
 	{
-		// Set motor power manually
+		// Turn on PID mode
 		motor_mode_var = MOTOR_PID;
 		uart_print(&bluetooth_uart_instance, "Motor PID mode\n");
 	}
@@ -106,7 +106,7 @@ void process_command (const u8 *str_ptr)
 		str_ptr++;
 		if (is_str_equal(parse_buffer, "pid"))
 		{
-			// Send all pid constant values
+			// TODO: Send all pid constant values
 		}
 		else
 		{
