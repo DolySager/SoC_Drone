@@ -1,12 +1,12 @@
 #ifndef __MYIP_TIMER_INTERRUPT_H_
 #define __MYIP_TIMER_INTERRUPT_H_
 
-#include "xil_exception.h"
-#include "xparameters.h"
+#include "main.h"
 
 #define SYSCLK_TO_US 100	// sysclk period (10ns) to 1us ratio
 
 static volatile unsigned int *timer0_interrupt_reg;
+float internal_motor_power_float[4];
 
 #define TIMER_INTR_VEC_ID XPAR_INTC_0_MYIP_TIMER_INTERRUPT_0_VEC_ID
 #define TIMER_INTR_BASEADDR XPAR_MYIP_TIMER_INTERRUPT_0_S00_AXI_BASEADDR

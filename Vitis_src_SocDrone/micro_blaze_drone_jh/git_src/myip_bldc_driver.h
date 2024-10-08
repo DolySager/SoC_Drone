@@ -1,6 +1,8 @@
 #ifndef __MYIP_BLDC_DRIVER_H_
 #define __MYIP_BLDC_DRIVER_H_
 
+#include "main.h"
+
 #define NUM_BLDC_MOTOR 4
 
 #define MOTOR0_MINDUTY 38
@@ -15,6 +17,8 @@ static volatile s32* motor_power_reg;
 
 
 void myip_bldcDriver_init();
-void myip_bldcDriver_setPower(s32 *motor_power_value_arr);
+void myip_bldcDriver_setPower_float(float *motor_power_value_float_arr);
+void myip_bldcDriver_turnAllOff();
+void myip_bldcDriver_manualPower(s32 motor_power);
 
 #endif /* __MYIP_BLDC_DRIVER_H_ */

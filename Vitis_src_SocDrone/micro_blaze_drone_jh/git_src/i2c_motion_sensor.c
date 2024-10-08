@@ -62,7 +62,7 @@ void calculate_Offset(s16 accel_data[3], s16 gyro_data[3], int samples)
     	gyro_sum[1] += gyro_data[1];
     	gyro_sum[2] += gyro_data[2];
 
-        MB_Sleep(10);
+    	usleep(10000);
     }
 
     /*Average*/

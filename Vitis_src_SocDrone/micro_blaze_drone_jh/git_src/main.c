@@ -1,42 +1,4 @@
-/*
- * Drone Overview
- *
- *		-pitch
- * 		 0   1
- * +roll	 x sensor	-roll
- * 		 3   2
- * 		 +pitch
- *
- *			min duty	direction
- * Motor 0:	38			CCW
- * Motor 1:	39			CW
- * Motor 2:	33			CCW
- * Motor 3:	13			CW
- */
-
-
-// standard include
-#include <stdio.h>
-
-// Xilinx include
-#include "platform.h"
-#include "xil_printf.h"
-#include "xparameters.h"
-#include "xiic.h"
-#include "math.h"
-#include "xintc.h"
-#include "xil_exception.h"
-#include "xuartlite.h"
-
-// custom include
-#include "myip_timer_interrupt.h"
-#include "uart.h"
-#include "intc.h"
-#include "i2c_motion_sensor.h"
-#include "pid_control.h"
-
-#define SAMPLING_PERIOD_S 0.05	//sampling period in second
-
+#include "main.h"
 
 int main() {
 
@@ -72,11 +34,11 @@ int main() {
     XUartLite_SetSendHandler(&bluetooth_uart_instance, bluetooth_SendHandler, &bluetooth_uart_instance);
     XUartLite_EnableInterrupt(&bluetooth_uart_instance);
 
-    uart_print(&bluetooth_uart_instance, "\n\nDrone (Rev. A) initializing, please wait...\n");
+    uart_print(&bluetooth_uart_instance, "\n\nDrone (Rev. B) initializing, please wait...\n");
 
     MPU6050_Init();
 
-    MB_Sleep(3000);	// for motor to startup
+    usleep(3000000);	// for motor to startup
 
     myip_timerInterrupt_setInterval_us (timer0_interrupt_reg, SAMPLING_PERIOD_S * 1000000);
     myip_timerInterrupt_start (timer0_interrupt_reg);

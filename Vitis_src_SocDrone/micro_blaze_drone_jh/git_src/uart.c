@@ -5,7 +5,7 @@ u8 rx_buffer_index = 0;
 u8 is_uart_receiving = 0;
 
 #define PARSE_BUFFER_SIZE 20
-static u8 parse_buffer[PARSE_BUFFER_SIZE];
+static char8 parse_buffer[PARSE_BUFFER_SIZE];
 
 void usb_SendHandler(void *CallBackRef, unsigned int EventData)
 {
@@ -37,7 +37,7 @@ void bluetooth_RecvHandler(void *CallBackRef, unsigned int ByteCount)
 }
 
 // NOTE: *str_ptr++ is same as *(str_ptr++), not (*str_ptr)++
-void uart_print(XUartLite *uart_inst_ptr, const char *str_ptr)
+void uart_print(XUartLite *uart_inst_ptr, const char8* str_ptr)
 {
 	while (*str_ptr != 0)
 	{
@@ -45,7 +45,7 @@ void uart_print(XUartLite *uart_inst_ptr, const char *str_ptr)
 	}
 }
 
-void process_command (const u8 *str_ptr)
+void process_command (char8 *str_ptr)
 {
 	str_ptr = parse_command(str_ptr, parse_buffer);	// parse first command
 	str_ptr++;							// increment str_handle pointer to skip space character
@@ -138,7 +138,7 @@ void process_command (const u8 *str_ptr)
 }
 
 // NOTE: *str_ptr++ is same as *(str_ptr++), not (*str_ptr)++
-u8 * parse_command(u8 *input_buffer, u8 *output_buffer)
+char8 * parse_command(char8 *input_buffer, char8 *output_buffer)
 {
 	// reset buffer
 	for (int i=0; i<PARSE_BUFFER_SIZE; ++i) output_buffer[i] = 0;
@@ -153,7 +153,7 @@ u8 * parse_command(u8 *input_buffer, u8 *output_buffer)
 
 // only process positive integer
 // NOTE: *str_ptr++ is same as *(str_ptr++), not (*str_ptr)++
-u32 parse_integer(const u8 *str_ptr)
+u32 parse_integer(const char8 *str_ptr)
 {
 	u32 result = 0;
 	while (*str_ptr >= '0' && *str_ptr <= '9')
@@ -165,7 +165,7 @@ u32 parse_integer(const u8 *str_ptr)
 }
 
 // NOTE: *str_ptr++ is same as *(str_ptr++), not (*str_ptr)++
-float parse_float(const u8 *str_ptr)
+float parse_float(const char8 *str_ptr)
 {
 	float result = 0;
 	while (*str_ptr >= '0' && *str_ptr <= '9')
@@ -188,7 +188,7 @@ float parse_float(const u8 *str_ptr)
 
 // compare two string equality
 // Does not check for string index overflow
-u8 is_str_equal (const u8 *str1_ptr, const char *str2_ptr)
+u8 is_str_equal (const char8 *str1_ptr, const char8 *str2_ptr)
 {
 	u8 result = 1;
 	u8 index = 0;
@@ -225,9 +225,9 @@ u8 is_str_equal (const u8 *str1_ptr, const char *str2_ptr)
  */
 void print_integer (XUartLite *uart_inst_ptr, u32 int_input)
 {
-	u8 print_buffer[PARSE_BUFFER_SIZE];
+	char8 print_buffer[PARSE_BUFFER_SIZE];
 	print_buffer[PARSE_BUFFER_SIZE-1] = '\0';		// add NULL character at the end
-	u8 *print_buffer_handle = print_buffer + (PARSE_BUFFER_SIZE-2);	// start filling buffer from the end, except NULL at the very end
+	char8 *print_buffer_handle = print_buffer + (PARSE_BUFFER_SIZE-2);	// start filling buffer from the end, except NULL at the very end
 	while (int_input)
 	{
 		*print_buffer_handle-- = (int_input % 10) + '0';	// read NOTE above for explanation
@@ -294,8 +294,8 @@ void print_float (XUartLite *uart_inst_ptr, float float_input)
 	}
 
 	// put the float to the buffer
-	u8 print_buffer[PARSE_BUFFER_SIZE];
-	u8 *print_buffer_handle = print_buffer;	// assign handle to the start of the buffer
+	char8 print_buffer[PARSE_BUFFER_SIZE];
+	char8 *print_buffer_handle = print_buffer;	// assign handle to the start of the buffer
 	u32 index = 0;	// to determine decimal point insertion index
 	while (float_input)
 	{

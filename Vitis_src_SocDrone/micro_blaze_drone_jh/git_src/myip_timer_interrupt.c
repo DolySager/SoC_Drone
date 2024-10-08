@@ -1,5 +1,7 @@
 #include "myip_timer_interrupt.h"
 
+float internal_motor_power_float[4] = {0, };
+
 /*
  * Link timer interrupt module control register
  */
@@ -36,21 +38,14 @@ void myip_timerInterrupt_stop (volatile unsigned int * timer_reg)
 void timer_intr_handler(void *CallBackRef)
 {
 	static float integral_roll, integral_pitch;
-	static float internal_motor_power_float[4] = {0, };
 
 	if (motor_mode_var == MOTOR_OFF)
 	{
-		bldc_power_arr[0] = 0;
-		bldc_power_arr[1] = 0;
-		bldc_power_arr[2] = 0;
-		bldc_power_arr[3] = 0;
+		myip_bldcDriver_turnAllOff();
 	}
 	else if (motor_mode_var == MOTOR_MANUAL)
 	{
-		bldc_power_arr[0] = motor_power_manual;
-		bldc_power_arr[1] = motor_power_manual;
-		bldc_power_arr[2] = motor_power_manual;
-		bldc_power_arr[3] = motor_power_manual;
+		myip_bldcDriver_manualPower(motor_power_manual);
 	}
 	else if (motor_mode_var == MOTOR_PID)
 	{
@@ -88,14 +83,9 @@ void timer_intr_handler(void *CallBackRef)
 			else if (internal_motor_power_float[i] < 0.0) internal_motor_power_float[i] = 0.0;
 		}
 
-		bldc_power_arr[0] = (s32) internal_motor_power_float[0];
-		bldc_power_arr[1] = (s32) internal_motor_power_float[1];
-		bldc_power_arr[2] = (s32) internal_motor_power_float[2];
-		bldc_power_arr[3] = (s32) internal_motor_power_float[3];
+		myip_bldcDriver_setPower_float(internal_motor_power_float);
 
 		// printf("%03.3f %03.3f / %03.3f %03.3f / %3d %3d %3d %3d\n", roll_filtered, pitch_filtered, error_roll, error_pitch, motor_power_reg[0], motor_power_reg[1], motor_power_reg[2], motor_power_reg[3]);
 	}
-
-	myip_bldcDriver_setPower(bldc_power_arr);
 
 }

@@ -1,9 +1,7 @@
 #ifndef __I2C_MOTION_SENSOR_H_
 #define __I2C_MOTION_SENSOR_H_
 
-#include "xil_types.h"
-#include "math.h"
-#include "xiic.h"
+#include "main.h"
 #include "xiic_l.h"
 
 #define MPU6050_ADDR		    0x68
