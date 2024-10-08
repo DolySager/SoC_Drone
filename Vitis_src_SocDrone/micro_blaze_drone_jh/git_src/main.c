@@ -34,13 +34,14 @@ int main() {
     XUartLite_SetSendHandler(&bluetooth_uart_instance, bluetooth_SendHandler, &bluetooth_uart_instance);
     XUartLite_EnableInterrupt(&bluetooth_uart_instance);
 
-    uart_print(&bluetooth_uart_instance, "\n\nDrone (Rev. B) initializing, please wait...\n");
+    uart_print(&bluetooth_uart_instance, "\n\nDrone (Rev. D) initializing, please wait...\n");
 
     MPU6050_Init();
 
     usleep(3000000);	// for motor to startup
 
-    myip_timerInterrupt_setInterval_us (timer0_interrupt_reg, SAMPLING_PERIOD_S * 1000000);
+    sampling_period_s = 0.01;
+    myip_timerInterrupt_setInterval_us (timer0_interrupt_reg, sampling_period_s * 1000000.0 );
     myip_timerInterrupt_start (timer0_interrupt_reg);
 
     // Start receiving bluetooth byte

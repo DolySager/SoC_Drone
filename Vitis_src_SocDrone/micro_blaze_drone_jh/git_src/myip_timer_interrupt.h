@@ -5,7 +5,7 @@
 
 #define SYSCLK_TO_US 100	// sysclk period (10ns) to 1us ratio
 
-static volatile unsigned int *timer0_interrupt_reg;
+volatile unsigned int *timer0_interrupt_reg;
 float internal_motor_power_float[4];
 
 #define TIMER_INTR_VEC_ID XPAR_INTC_0_MYIP_TIMER_INTERRUPT_0_VEC_ID

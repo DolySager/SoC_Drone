@@ -120,6 +120,8 @@ void process_command (char8 *str_ptr)
 		uart_print(&bluetooth_uart_instance, "manual <0..255>: set motor power\n");
 		uart_print(&bluetooth_uart_instance, "pid: set motor to pid mode\n");
 		uart_print(&bluetooth_uart_instance, "set (kp|ki|kd) <float>: set pid constant\n");
+		uart_print(&bluetooth_uart_instance, "reset: reset PID integral accumulated value\n");
+		uart_print(&bluetooth_uart_instance, "sample <float>: change sampling period (in second)\n");
 		uart_print(&bluetooth_uart_instance, "help: display this message\n");
 	}
 	else if (is_str_equal(parse_buffer, "reset"))
@@ -129,6 +131,15 @@ void process_command (char8 *str_ptr)
 		internal_motor_power_float[2] = 0;
 		internal_motor_power_float[3] = 0;
 		uart_print(&bluetooth_uart_instance, "Motor power reset done\n");
+	}
+	else if (is_str_equal(parse_buffer, "sample"))
+	{
+		myip_timerInterrupt_stop (timer0_interrupt_reg);
+		sampling_period_s = parse_float(str_ptr);
+	    myip_timerInterrupt_setInterval_us (timer0_interrupt_reg, sampling_period_s * 1000000.0 );
+	    uart_print(&bluetooth_uart_instance, "Sampling period changed to ");
+	    print_float(&bluetooth_uart_instance, sampling_period_s);
+	    myip_timerInterrupt_start (timer0_interrupt_reg);
 	}
 	else
 	{
@@ -238,7 +249,6 @@ void print_integer (XUartLite *uart_inst_ptr, u32 int_input)
 }
 
 
-// TODO: NOT TESTED YET
 /*
  * Print float to uart
  *

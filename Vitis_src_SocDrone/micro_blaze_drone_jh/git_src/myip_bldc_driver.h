@@ -13,7 +13,7 @@
 #define BLDC_MOTOR_BASEADDR 	XPAR_MYIP_DRONE_BLDC_MOTO_0_S00_AXI_BASEADDR
 
 s32 bldc_power_arr[NUM_BLDC_MOTOR];
-static volatile s32* motor_power_reg;
+volatile s32* motor_power_reg;
 
 
 void myip_bldcDriver_init();

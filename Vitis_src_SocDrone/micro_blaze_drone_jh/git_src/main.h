@@ -39,7 +39,7 @@
 #include "i2c_motion_sensor.h"
 #include "pid_control.h"
 
-#define SAMPLING_PERIOD_S 0.01	//sampling period in second
+float sampling_period_s;	//sampling period in second
 
 
 #endif /* __MAIN_H_ */

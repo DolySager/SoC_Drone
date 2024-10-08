@@ -7,7 +7,7 @@ float internal_motor_power_float[4] = {0, };
  */
 void myip_timerInterrupt_init()
 {
-	timer0_interrupt_reg = (volatile unsigned int *) XPAR_MYIP_TIMER_INTERRUPT_0_S00_AXI_BASEADDR;
+	timer0_interrupt_reg = (volatile unsigned int *) TIMER_INTR_BASEADDR;
 }
 
 /*
@@ -69,15 +69,15 @@ void timer_intr_handler(void *CallBackRef)
 		// pitch_filtered = complementaryFilter(pitch_accel, pitch_gyro, alpha);
 
 	   	float error_roll, error_pitch;
-	   	error_roll = PID_Control(0, roll_accel, &integral_roll, Kp_roll, Ki_roll, Kd_roll, SAMPLING_PERIOD_S);
-	   	error_pitch = PID_Control(0, pitch_accel, &integral_pitch, Kp_pitch, Ki_pitch, Kd_pitch, SAMPLING_PERIOD_S);
+	   	error_roll = PID_Control(0, roll_accel, &integral_roll, Kp_roll, Ki_roll, Kd_roll, sampling_period_s);
+	   	error_pitch = PID_Control(0, pitch_accel, &integral_pitch, Kp_pitch, Ki_pitch, Kd_pitch, sampling_period_s);
 
 	   	internal_motor_power_float[0] = MOTOR0_MINDUTY - error_roll + error_pitch;
 	   	internal_motor_power_float[1] = MOTOR1_MINDUTY + error_roll + error_pitch;
 	   	internal_motor_power_float[2] = MOTOR2_MINDUTY + error_roll - error_pitch;
 	   	internal_motor_power_float[3] = MOTOR3_MINDUTY - error_roll - error_pitch;
 
-		for (u8 i=0; i<4; i++)
+		for (u8 i=0; i<4; ++i)
 		{
 			if (internal_motor_power_float[i] > 255.0) internal_motor_power_float[i] = 255.0;
 			else if (internal_motor_power_float[i] < 0.0) internal_motor_power_float[i] = 0.0;

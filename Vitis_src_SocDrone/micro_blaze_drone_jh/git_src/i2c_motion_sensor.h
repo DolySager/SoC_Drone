@@ -6,8 +6,6 @@
 
 #define MPU6050_ADDR		    0x68
 
-extern XIic iic_instance;
-
 float roll_gyro, pitch_gyro;
 float roll_accel, pitch_accel;
 float roll_filtered, pitch_filtered;
