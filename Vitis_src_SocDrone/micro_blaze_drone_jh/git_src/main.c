@@ -34,7 +34,7 @@ int main() {
     XUartLite_SetSendHandler(&bluetooth_uart_instance, bluetooth_SendHandler, &bluetooth_uart_instance);
     XUartLite_EnableInterrupt(&bluetooth_uart_instance);
 
-    uart_print(&bluetooth_uart_instance, "\n\nDrone (Rev. D) initializing, please wait...\n");
+    uart_print(&bluetooth_uart_instance, "\n\nDrone (Rev. E) initializing, please wait...\n");
 
     MPU6050_Init();
 

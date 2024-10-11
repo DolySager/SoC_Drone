@@ -79,8 +79,8 @@ void timer_intr_handler(void *CallBackRef)
 
 		for (u8 i=0; i<4; ++i)
 		{
-			if (internal_motor_power_float[i] > 255.0) internal_motor_power_float[i] = 255.0;
-			else if (internal_motor_power_float[i] < 0.0) internal_motor_power_float[i] = 0.0;
+			if (internal_motor_power_float[i] > 254.0) internal_motor_power_float[i] = 254.0;	// gave some room around the edge value
+			else if (internal_motor_power_float[i] < 1.0) internal_motor_power_float[i] = 1.0;	// gave some room around the edge value
 		}
 
 		myip_bldcDriver_setPower_float(internal_motor_power_float);

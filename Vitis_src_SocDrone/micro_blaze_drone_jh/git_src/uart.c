@@ -19,7 +19,7 @@ void usb_RecvHandler(void *CallBackRef, unsigned int EventData)
 
 void bluetooth_SendHandler(void *CallBackRef, unsigned int ByteCount)
 {
-	while (XUartLite_IsSending(&bluetooth_uart_instance));		// TODO: seems not affecting anything
+
 }
 
 void bluetooth_RecvHandler(void *CallBackRef, unsigned int ByteCount)
@@ -28,10 +28,11 @@ void bluetooth_RecvHandler(void *CallBackRef, unsigned int ByteCount)
 	rx_buffer[rx_buffer_index++] = rx_byte_buffer;		// use "rx_buffer_index" first then increment it
 	if ((rx_buffer[rx_buffer_index-1] == '\r' ||  rx_buffer[rx_buffer_index-1] == '\n') &&  (rx_buffer[rx_buffer_index-2] == '\r' ||  rx_buffer[rx_buffer_index-2] == '\n') )
 	{
+		rx_buffer[rx_buffer_index] = 0;	// NULL char at the end
 		process_command(rx_buffer);
 		rx_buffer_index = 0;
 	}
-	if (rx_buffer_index >= RX_BUFFER_SIZE-1) rx_buffer_index = 0;	// buffer overflow prevention
+	if (rx_buffer_index >= RX_BUFFER_SIZE-2) rx_buffer_index = 0;	// buffer overflow prevention (-2 for accounting NULL char at the end)
 
 	XUartLite_Recv(&bluetooth_uart_instance, &rx_byte_buffer, 1);
 }
@@ -102,16 +103,40 @@ void process_command (char8 *str_ptr)
 	}
 	else if (is_str_equal(parse_buffer, "show"))
 	{
-		str_ptr = parse_command(str_ptr, parse_buffer);
-		str_ptr++;
-		if (is_str_equal(parse_buffer, "pid"))
-		{
-			// TODO: Send all pid constant values
-		}
-		else
-		{
-			uart_print(&bluetooth_uart_instance, "Error\n");
-		}
+		uart_print(&bluetooth_uart_instance, "Sampling Rate: ");
+		print_float(&bluetooth_uart_instance, sampling_period_s);
+		uart_print(&bluetooth_uart_instance, "\nKp: ");
+		print_float(&bluetooth_uart_instance, Kp_pitch);
+		uart_print(&bluetooth_uart_instance, "\tKi: ");
+		print_float(&bluetooth_uart_instance, Ki_pitch);
+		uart_print(&bluetooth_uart_instance, "\tKd: ");
+		print_float(&bluetooth_uart_instance, Kd_pitch);
+		uart_print(&bluetooth_uart_instance, "\nCurrent Motor Power:\n");
+		print_integer(&bluetooth_uart_instance, motor_power_reg[0]);
+		uart_print(&bluetooth_uart_instance, "\t");
+		print_integer(&bluetooth_uart_instance, motor_power_reg[1]);
+		uart_print(&bluetooth_uart_instance, "\t");
+		print_integer(&bluetooth_uart_instance, motor_power_reg[2]);
+		uart_print(&bluetooth_uart_instance, "\t");
+		print_integer(&bluetooth_uart_instance, motor_power_reg[3]);
+		uart_print(&bluetooth_uart_instance, "\n\n");
+	}
+	else if (is_str_equal(parse_buffer, "reset"))
+	{
+		internal_motor_power_float[0] = 0;
+		internal_motor_power_float[1] = 0;
+		internal_motor_power_float[2] = 0;
+		internal_motor_power_float[3] = 0;
+		uart_print(&bluetooth_uart_instance, "PID integral value reset done\n");
+	}
+	else if (is_str_equal(parse_buffer, "sample"))
+	{
+		myip_timerInterrupt_stop (timer0_interrupt_reg);
+		sampling_period_s = parse_float(str_ptr);
+	    myip_timerInterrupt_setInterval_us (timer0_interrupt_reg, sampling_period_s * 1000000.0 );
+	    uart_print(&bluetooth_uart_instance, "Sampling period changed to ");
+	    print_float(&bluetooth_uart_instance, sampling_period_s);
+	    myip_timerInterrupt_start (timer0_interrupt_reg);
 	}
 	else if (is_str_equal(parse_buffer, "help"))
 	{
@@ -122,24 +147,8 @@ void process_command (char8 *str_ptr)
 		uart_print(&bluetooth_uart_instance, "set (kp|ki|kd) <float>: set pid constant\n");
 		uart_print(&bluetooth_uart_instance, "reset: reset PID integral accumulated value\n");
 		uart_print(&bluetooth_uart_instance, "sample <float>: change sampling period (in second)\n");
+		uart_print(&bluetooth_uart_instance, "show: display sampling rate, PID constants, and motor power values\n");
 		uart_print(&bluetooth_uart_instance, "help: display this message\n");
-	}
-	else if (is_str_equal(parse_buffer, "reset"))
-	{
-		internal_motor_power_float[0] = 0;
-		internal_motor_power_float[1] = 0;
-		internal_motor_power_float[2] = 0;
-		internal_motor_power_float[3] = 0;
-		uart_print(&bluetooth_uart_instance, "Motor power reset done\n");
-	}
-	else if (is_str_equal(parse_buffer, "sample"))
-	{
-		myip_timerInterrupt_stop (timer0_interrupt_reg);
-		sampling_period_s = parse_float(str_ptr);
-	    myip_timerInterrupt_setInterval_us (timer0_interrupt_reg, sampling_period_s * 1000000.0 );
-	    uart_print(&bluetooth_uart_instance, "Sampling period changed to ");
-	    print_float(&bluetooth_uart_instance, sampling_period_s);
-	    myip_timerInterrupt_start (timer0_interrupt_reg);
 	}
 	else
 	{
